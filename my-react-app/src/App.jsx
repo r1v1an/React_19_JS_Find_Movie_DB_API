@@ -20,7 +20,7 @@ const App = () => {
   return (
     <div className="card-container">
       <Card title="Star Wars" rating={5} isCool={true} />
-      <Card title="Avatat" />
+      <Card title="Avatar" />
       <Card title="The Lion king" />
     </div>
   );
