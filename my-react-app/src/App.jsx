@@ -1,4 +1,4 @@
-const Card = ({title, rating, isCool}) => {
+const Card = ({title}) => {
   return(
     <div style={{
       border: '1px solid white',
@@ -8,7 +8,7 @@ const Card = ({title, rating, isCool}) => {
       borderRadius: '10px',
       minHeight: '100px'
     }}>
-      <h2>{title} {rating} {isCool ? "Cool" : "terrible"}</h2>
+      <h2>{title}</h2>
     </div>
   )
 }
@@ -20,8 +20,8 @@ const App = () => {
       <div className="card-container">
         <h2>Functional Arrow Component</h2>
         <Card title="Star Wars" rating={5} isCool={true}/>
-        <Card title="Avatat" rating={4} isCool={false}/>
-        <Card title="Lion king" rating={3} isCool={true}/>
+        <Card title="Avatat"/>
+        <Card title="Lion king"/>
       </div>
     )
 }
