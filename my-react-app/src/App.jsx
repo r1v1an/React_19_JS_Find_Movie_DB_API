@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Card = ({ title }) => {
 
+  const [count, setCount] = useState(0);
+
   const [hasLiked, setHasLiked] = useState(false); // Хук деструктуирует массив[логическая переменная, функция обновления состояния этой переменной]
 
+  useEffect(() => {
+    console.log(`${title} has been liked: ${hasLiked}`);
+  });
+
   return (
-    <div className="card">
-      <h2>{title}</h2>
+    <div className="card" onClick={() => setCount(count + 1)}> {/* Не рекомендуется использовать само состояние count - используйте 1ую букву c */}
+      <h2>{title} <br /> {count}</h2>
 
       <button onClick={() => setHasLiked(!hasLiked)}> {/* Переключение состояния через отрицание !переменной */}
         {hasLiked ? '❤️' : '🤍'}
