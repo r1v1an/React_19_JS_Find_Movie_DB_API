@@ -2,13 +2,13 @@ import { useState } from "react";
 
 const Card = ({ title }) => {
 
-  const [hasLiked, setHasLiked] = useState(false); // Хук деструктуирует массив[логическая переменная, обновление состояния этой переменной]
+  const [hasLiked, setHasLiked] = useState(false); // Хук деструктуирует массив[логическая переменная, функция обновления состояния этой переменной]
 
   return (
     <div className="card">
       <h2>{title}</h2>
 
-      <button onClick={() => setHasLiked(true)}>
+      <button onClick={() => setHasLiked(!hasLiked)}> {/* Переключение состояния через отрицание !переменной */}
         {hasLiked ? '❤️' : '🤍'}
       </button>
     </div>
