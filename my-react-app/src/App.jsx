@@ -8,7 +8,11 @@ const Card = ({ title }) => {
 
   useEffect(() => {
     console.log(`${title} has been liked: ${hasLiked}`);
-  });
+  }, [hasLiked]); // 2й параметр массива зависимостей "глубина" - проверяет изменение установленных параметров через ,
+
+  useEffect(() => {
+    console.log(`CARD RENDERED`);
+  }, []); // Разовый рендер при монтировании
 
   return (
     <div className="card" onClick={() => setCount(count + 1)}> {/* Не рекомендуется использовать само состояние count - используйте 1ую букву c */}
