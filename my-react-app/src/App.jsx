@@ -1,35 +1,22 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+const Card = ({title, rating, isCool, actors}) => {
+  return(
+    <div>
+      <h2>{title} {rating} {isCool ? "Cool" : "terrible"}</h2>
+    </div>
   )
+}
+
+
+const App = () => {
+
+    return (
+      <>
+      <h2>Functional Arrow Component</h2>
+      <Card title="Star Wars" rating={5} isCool={true} actors={[{name:'R2D2'}]}/>
+      <Card title="Avatat" rating={4} isCool={false} actors={[{name:'Blueman'}]}/>
+      <Card title="Lion king" rating={3} isCool={true} actors={[{name:'Simba'}]}/>
+      </>
+    )
 }
 
 export default App
