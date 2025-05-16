@@ -5,7 +5,7 @@ const Search = ({searchTerm, setSearchTerm}) => { // И не нужно писа
     return (
         <div className='search'>
             <div>
-                <img src="./public/search.svg" alt="Search" />
+                <img src="./search.svg" alt="Search" />
                 <input  type="text" 
                         placeholder='Search through thousands of movies'
                         value={searchTerm}
