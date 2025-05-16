@@ -4,7 +4,7 @@ import Search from "./components/Search";
 // Подключение API TMDB 
 const API_BASE_URL = 'https://api.themoviedb.org/3'; // сперва отправляем базовый url запрос
 
-const API_KEY = import.meta.VITE_TMDB_API_KEY; // затем ипортируем апи ключ расположенный в .env.local
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY; // затем ипортируем апи ключ расположенный в .env.local
 
 const API_OPTIONS = { // определяем нужные параметры апи
   method: 'GET',
@@ -26,7 +26,13 @@ const App = () => {
       // fetch встроенная функция JS которая позволяет отправлять http запросы GET, POST и т.п. на разные апи или серверы и получить ответ
       const response = await fetch(endpoint, API_OPTIONS);  // вызываем конечную точку и параметры апи
 
-      throw new Error(`Failed to fetch movies`);
+    if(!response.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+
+    const data = await response.json();
+
+    console.log(data);
 
     } catch(error) {
     console.error(`Error fetching movies: ${error}`);
