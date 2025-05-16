@@ -6,7 +6,9 @@ const person = {
     location: 'Gotham City'
 }
 
-console.log(name);
+const {name, age, location} = person; // Можно деструктуировать объекты для упрощенного дальнейшего использования
+
+console.log(name); // Bruce Wayne
 
 const Search = (props) => {
     return (
