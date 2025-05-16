@@ -1,18 +1,11 @@
 import React from 'react'
 
-const person = {
-    name: 'Bruce Wayne',
-    age: 36,
-    location: 'Gotham City'
-}
+const Search = ({searchTerm, setSearchTerm}) => { // И не нужно писать props! Но и дочерний компонент searchTerm нельзя изменять т.к. он доступен только для чтения и может менять его значения в разных местах
 
-const {name, age, location} = person; // Можно деструктуировать объекты для упрощенного дальнейшего использования
+    searchTerm='I AM BATMAN NOT!' // НЕЛЬЗЯ ТАК ДЕЛАТЬ
 
-console.log(name); // Bruce Wayne
-
-const Search = (props) => {
     return (
-        <div className='text-white text-3xl'>{props.searchTerm}</div>
+        <div className='text-white text-3xl'>{searchTerm}</div>
     )
 }
 
