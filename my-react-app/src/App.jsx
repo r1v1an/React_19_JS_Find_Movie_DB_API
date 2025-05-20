@@ -23,7 +23,7 @@ const App = () => {
 
   const [movieList, setMovieList] = useState([]); // Пустое массив "поле состояния", в которое можно получить данные с API
 
-  const [isLoading, setIsLoading] = useState(true); // "Состояние загрузки" во время получении данных с API
+  const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
 
   const fetchMovies = async () => {
     setIsLoading(true); // Запуск загрузки
@@ -55,7 +55,7 @@ const App = () => {
       console.error(`Error fetching movies: ${error}`);
       setErrorMessage(`Error fetching movies: Please try again later.`); // Создание кастомной ошибки
     } finally {
-      setIsLoading(true); // независимо от результата нет необходимости показывать состояние загрузки
+      setIsLoading(false); // независимо от результата нет необходимости показывать состояние загрузки
     }
   };
 
@@ -78,9 +78,8 @@ const App = () => {
         </header>
 
         <section className="all-movies">
-          <h2>All Movies</h2>
+          <h2 className="mt-[40px]">All Movies</h2>
           {isLoading ? (
-            // <p className="text-white">Loading...</p>
             <Spinner/>
           ) : errorMessage ? (
             <p className="text-red-500">{errorMessage}</p>
