@@ -50,7 +50,7 @@ const App = () => {
         return;
       }
 
-      setMovieList(data.results || []); // Пустой массив заполнится данными с апи
+      setMovieList(data.results || []); // Пустой массив заполнится данными с API
     } catch (error) {
       console.error(`Error fetching movies: ${error}`);
       setErrorMessage(`Error fetching movies: Please try again later.`); // Создание кастомной ошибки
