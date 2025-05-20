@@ -1,63 +1,63 @@
 import React, { useState, useEffect } from "react";
 import Search from "./components/Search";
+import Spinner from "./components/Spinner"
 
-// Подключение API TMDB 
-const API_BASE_URL = 'https://api.themoviedb.org/3'; // сперва отправляем базовый url запрос
+// Подключение API TMDB
+const API_BASE_URL = "https://api.themoviedb.org/3"; // сперва отправляем базовый url запрос
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY; // затем ипортируем апи ключ расположенный в .env.local
 
-const API_OPTIONS = { // определяем нужные параметры апи
-  method: 'GET',
+const API_OPTIONS = {
+  // определяем нужные параметры апи
+  method: "GET",
   headers: {
-    accept: 'application/json', // апи отправит объект в формате джсон
-    Authorization: `Bearer ${API_KEY}` // авторизация апи подтверждает кто хочет отправить запрос
-  }
-}
+    accept: "application/json", // апи отправит объект в формате джсон
+    Authorization: `Bearer ${API_KEY}`, // авторизация апи подтверждает кто хочет отправить запрос
+  },
+};
 
 const App = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [movieList, setMovieList] = useState([]); // Пустое массив "поле состояния", в которое можно получить данные с API
 
-  const [isLoading, setIsLoading] = useState(false);// "Состояние загрузки" во время получении данных с API
+  const [isLoading, setIsLoading] = useState(true); // "Состояние загрузки" во время получении данных с API
 
   const fetchMovies = async () => {
-
     setIsLoading(true); // Запуск загрузки
-    setErrorMessage(''); // Пустое поле ошибки
+    setErrorMessage(""); // Пустое поле ошибки
 
-    try {                                                                       // используется try и catch для отлова ошибок
+    try {
+      // используется try и catch для отлова ошибок
       const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`; // Конечная точка
 
       // fetch встроенная функция JS которая позволяет отправлять http запросы GET, POST и т.п. на разные апи или серверы и получить ответ
-      const response = await fetch(endpoint, API_OPTIONS);  // вызываем конечную точку и параметры апи
+      const response = await fetch(endpoint, API_OPTIONS); // вызываем конечную точку и параметры апи
 
-    if(!response.ok) {
-      throw new Error('Failed to fetch movies');
+      if (!response.ok) {
+        throw new Error("Failed to fetch movies");
+      }
+
+      const data = await response.json(); // Ответ с API получен
+
+      if (data.Response === "False") {
+        // Сообщение об ошибке если данные не будут получены
+        setErrorMessage(data.Error || "Failed to fetch movies");
+        setMovieList([]); // Будет создан пустой массив при ошибке
+
+        return;
+      }
+
+      setMovieList(data.results || []); // Пустой массив заполнится данными с апи
+    } catch (error) {
+      console.error(`Error fetching movies: ${error}`);
+      setErrorMessage(`Error fetching movies: Please try again later.`); // Создание кастомной ошибки
+    } finally {
+      setIsLoading(true); // независимо от результата нет необходимости показывать состояние загрузки
     }
-
-    const data = await response.json(); // Ответ с API получен
-
-    if(data.Response === 'False') {     // Сообщение об ошибке если данные не будут получены
-      setErrorMessage(data.Error || 'Failed to fetch movies');
-      setMovieList([]); // Будет создан пустой массив при ошибке
-
-      return;
-    }
-
-    setMovieList(data.results || []); // Пустой массив заполнится данными с апи
-
-    } catch(error) {
-    console.error(`Error fetching movies: ${error}`);
-    setErrorMessage(`Error fetching movies: Please try again later.`); // Создание кастомной ошибки
-    }
-
-    finally {
-      setIsLoading(false); // независимо от результата нет необходимости показывать состояние загрузки
-    }
-  }
+  };
 
   useEffect(() => {
     fetchMovies();
@@ -65,21 +65,39 @@ const App = () => {
 
   return (
     <main>
-      <div className="pattern"/>
+      <div className="pattern" />
 
       <div className="wrapper">
         <header>
-          <img src="./hero-img.png" alt="Hero Banner"/>
-          <h1>Find <span className="text-gradient">Movies</span> You'll Enjoy Without the Hassle</h1>
-          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
+          <img src="./hero-img.png" alt="Hero Banner" />
+          <h1>
+            Find <span className="text-gradient">Movies</span> You'll Enjoy
+            Without the Hassle
+          </h1>
+          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
 
         <section className="all-movies">
           <h2>All Movies</h2>
-          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+          {isLoading ? (
+            // <p className="text-white">Loading...</p>
+            <Spinner/>
+          ) : errorMessage ? (
+            <p className="text-red-500">{errorMessage}</p>
+          ) : (
+            <ul>
+              {movieList.map(
+                (
+                  movie // () => () способ "немедленного возвращения" при котором не нужен return и чище код
+                ) => (
+                  <p key={movie.id} className="text-white">{movie.title}</p> // Нужен уникальный ключ для каждого элемента .id
+                )
+              )}
+            </ul>
+          )}
+          ;
         </section>
       </div>
-
     </main>
   );
 };
