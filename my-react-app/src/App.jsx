@@ -19,7 +19,15 @@ const App = () => {
 
   const [errorMessage, setErrorMessage] = useState('');
 
+  const [movieList, setMovieList] = useState([]); // Пустое массив "поле состояния", в которое можно получить данные с API
+
+  const [isLoading, setIsLoading] = useState(false);// "Состояние загрузки" во время получении данных с API
+
   const fetchMovies = async () => {
+
+    setIsLoading(true); // Запуск загрузки
+    setErrorMessage(''); // Пустое поле ошибки
+
     try {                                                                       // используется try и catch для отлова ошибок
       const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`; // Конечная точка
 
@@ -30,13 +38,24 @@ const App = () => {
       throw new Error('Failed to fetch movies');
     }
 
-    const data = await response.json();
+    const data = await response.json(); // Ответ с API получен
 
-    console.log(data);
+    if(data.Response === 'False') {     // Сообщение об ошибке если данные не будут получены
+      setErrorMessage(data.Error || 'Failed to fetch movies');
+      setMovieList([]); // Будет создан пустой массив при ошибке
+
+      return;
+    }
+
+    setMovieList(data.results || []); // Пустой массив заполнится данными с апи
 
     } catch(error) {
     console.error(`Error fetching movies: ${error}`);
     setErrorMessage(`Error fetching movies: Please try again later.`); // Создание кастомной ошибки
+    }
+
+    finally {
+      setIsLoading(false); // независимо от результата нет необходимости показывать состояние загрузки
     }
   }
 
