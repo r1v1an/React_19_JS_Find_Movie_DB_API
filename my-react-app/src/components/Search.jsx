@@ -1,4 +1,3 @@
-import React from 'react'
 
 const Search = ({searchTerm, setSearchTerm}) => { // И не нужно писать props! Но и дочерний компонент searchTerm нельзя изменять т.к. он доступен только для чтения и может менять его значения в разных местах
 
