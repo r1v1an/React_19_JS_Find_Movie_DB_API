@@ -26,13 +26,17 @@ const App = () => {
 
   const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (query = '') => { // query = '' параметр поискового запроса
     setIsLoading(true); // Запуск загрузки
     setErrorMessage(""); // Пустое поле ошибки
 
     try {
       // используется try и catch для отлова ошибок
-      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`; // Конечная точка
+      // Конечная точка
+      const endpoint = query 
+        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}` // encodeURIComponent() кодировка строки в URI
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      // /discover/movie + ?sort_by=popularity.desc и /search/movie + ?query=${encodeURIComponent(query)} вариации параметров прописаны в документации апи 
 
       // fetch встроенная функция JS которая позволяет отправлять http запросы GET, POST и т.п. на разные апи или серверы и получить ответ
       const response = await fetch(endpoint, API_OPTIONS); // вызываем конечную точку и параметры апи
@@ -61,8 +65,8 @@ const App = () => {
   };
 
   useEffect(() => {
-    fetchMovies();
-  }, []); // Выполнится 1 раз при монтировании
+    fetchMovies(searchTerm);
+  }, [searchTerm]); // Выполнится 1 раз при монтировании
 
   return (
     <main>
