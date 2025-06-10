@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
+import {useDebounce} from "react-use";
 
 // Подключение API TMDB
 const API_BASE_URL = "https://api.themoviedb.org/3"; // сперва отправляем базовый url запрос
@@ -19,12 +20,14 @@ const API_OPTIONS = {
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
   const [errorMessage, setErrorMessage] = useState("");
-
   const [movieList, setMovieList] = useState([]); // Пустое массив "поле состояния", в которое можно получить данные с API
-
   const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  // Хук отложенного поискового запроса на 1 сек
+  // Для предотвращения перегрузки запросами апи
+  useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm]);
 
   const fetchMovies = async (query = '') => { // query = '' параметр поискового запроса
     setIsLoading(true); // Запуск загрузки
@@ -65,8 +68,8 @@ const App = () => {
   };
 
   useEffect(() => {
-    fetchMovies(searchTerm);
-  }, [searchTerm]); // Выполнится 1 раз при монтировании
+    fetchMovies(debouncedSearchTerm);
+  }, [debouncedSearchTerm]); // Выполнится 1 раз при монтировании
 
   return (
     <main>
