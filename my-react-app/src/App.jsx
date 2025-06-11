@@ -2,7 +2,8 @@ import React, { useState, useEffect} from "react";
 import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
-import {useDebounce} from "react-use";
+import { useDebounce } from "react-use";
+import { updateSearchCount } from "./appwrite";
 
 // Подключение API TMDB
 const API_BASE_URL = "https://api.themoviedb.org/3"; // сперва отправляем базовый url запрос
@@ -59,6 +60,12 @@ const App = () => {
       }
 
       setMovieList(data.results || []); // Пустой массив заполнится данными с API
+
+      // вызов функции показа метрики с апи appwrite
+      if(query && data.results.lenght > 0) {
+        await updateSearchCount(query, data.results[0]);
+      } 
+
     } catch (error) {
       console.error(`Error fetching movies: ${error}`);
       setErrorMessage(`Error fetching movies: Please try again later.`); // Создание кастомной ошибки
