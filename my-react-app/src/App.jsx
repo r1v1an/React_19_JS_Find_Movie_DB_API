@@ -3,7 +3,7 @@ import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
 import { useDebounce } from "react-use";
-import { updateSearchCount } from "./appwrite";
+import { updateSearchCount } from "./appwrite.js";
 
 // Подключение API TMDB
 const API_BASE_URL = "https://api.themoviedb.org/3"; // сперва отправляем базовый url запрос
@@ -62,7 +62,7 @@ const App = () => {
       setMovieList(data.results || []); // Пустой массив заполнится данными с API
 
       // вызов функции показа метрики с апи appwrite
-      if(query && data.results.lenght > 0) {
+      if(query && data.results.length > 0) {
         await updateSearchCount(query, data.results[0]);
       } 
 
