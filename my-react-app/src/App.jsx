@@ -1,9 +1,9 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect, use} from "react";
 import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
 import { useDebounce } from "react-use";
-import { updateSearchCount } from "./appwrite.js";
+import { updateSearchCount, getTrendingMovies } from "./appwrite.js";
 
 // Подключение API TMDB
 const API_BASE_URL = "https://api.themoviedb.org/3"; // сперва отправляем базовый url запрос
@@ -20,11 +20,14 @@ const API_OPTIONS = {
 };
 
 const App = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [movieList, setMovieList] = useState([]); // Пустое массив "поле состояния", в которое можно получить данные с API
-  const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  const [movieList, setMovieList] = useState([]); // Пустое массив "поле состояния", в которое можно получить данные с API
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
+  
+  const [trendingMovies, setTrendingMovies] = useState([]);
 
   // Хук отложенного поискового запроса на 1 сек
   // Для предотвращения перегрузки запросами апи
@@ -74,9 +77,24 @@ const App = () => {
     }
   };
 
+  const loadTrendingMovies = async () => {
+    try{
+      const movies = await getTrendingMovies(); // Обязательно импортируйте функции из appwrite
+
+      setTrendingMovies(movies);
+    } catch(error) {
+      console.error(`Error fetching trending movies: ${error}`);
+    }
+  }
+
+  // Выполнится 1 раз при монтировании
   useEffect(() => {
     fetchMovies(debouncedSearchTerm);
-  }, [debouncedSearchTerm]); // Выполнится 1 раз при монтировании
+  }, [debouncedSearchTerm]); 
+
+  useEffect(() => {
+    loadTrendingMovies()
+  }, []);
 
   return (
     <main>
@@ -92,8 +110,23 @@ const App = () => {
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
 
+        {trendingMovies.length > 0 && (
+          <section className="trending">
+            <h2>Trending Movies</h2>
+
+            <ul>
+              {trendingMovies.map((movie, index) => ( // .map преобразуем массив с БД
+                <li key={movie.$id}>
+                  <p>{index + 1}</p>
+                  <img src={movie.poster_url?.includes('/null') ? '/No-Poster.png' : movie.poster_url} alt={movie.title}/>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <section className="all-movies">
-          <h2 className="mt-[40px]">All Movies</h2>
+          <h2>All Movies</h2>
           {isLoading ? (
             <Spinner />
           ) : errorMessage ? (

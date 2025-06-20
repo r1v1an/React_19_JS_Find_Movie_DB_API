@@ -34,3 +34,18 @@ export const updateSearchCount = async (searchTerm, movie) => {
         console.error(error);
     }
 }
+
+// Параметры не нужны при извлечении из БД appwrite
+export const getTrendingMovies = async () => {
+    try{
+        const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
+            Query.limit(10), // Ограничение до 10
+            Query.orderDesc("count") // Сортировка по убыванию кол-ва просмотров
+        ])
+
+        return result.documents;
+
+    } catch(error) {
+        console.error(error);
+    }
+}
