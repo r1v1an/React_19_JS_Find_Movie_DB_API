@@ -23,7 +23,7 @@ const App = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [searchTerm, setSearchTerm] = useState("");
   
-  const [movieList, setMovieList] = useState([]); // Пустое массив "поле состояния", в которое можно получить данные с API
+  const [movieList, setMovieList] = useState([]); // Пустой массив "поле состояния", в которое можно получить данные с API
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
   
@@ -110,7 +110,7 @@ const App = () => {
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
 
-        {trendingMovies.length > 0 && (
+        {trendingMovies.length > 0 && ( // Условное замыкание &&
           <section className="trending">
             <h2>Trending Movies</h2>
 
@@ -127,7 +127,7 @@ const App = () => {
 
         <section className="all-movies">
           <h2>All Movies</h2>
-          {isLoading ? (
+          {isLoading ? ( // Условный рендеринг ? : 
             <Spinner />
           ) : errorMessage ? (
             <p className="text-red-500">{errorMessage}</p>
