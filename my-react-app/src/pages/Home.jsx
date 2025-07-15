@@ -6,15 +6,18 @@ import { fetchMovies } from "../services/tmdb-api";
 import { useDebounce } from "react-use";
 import { updateSearchCount, getTrendingMovies } from "../services/appwrite-api";
 
+
+
 const Home = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [searchTerm, setSearchTerm] = useState("");
-  
   const [movieList, setMovieList] = useState([]); // Пустой массив "поле состояния", в которое можно получить данные с API
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
-  
   const [trendingMovies, setTrendingMovies] = useState([]);
+
+  setIsLoading(true); // Запуск загрузки
+  setErrorMessage(""); // Пустое поле ошибки
 
   // Хук отложенного поискового запроса на 1 сек
   // Для предотвращения перегрузки запросами апи
@@ -29,6 +32,23 @@ const Home = () => {
       console.error(`Error fetching trending movies: ${error}`);
     }
   }
+
+  useEffect(() => {
+    const getMovies = async () => {
+      setIsLoading(true);
+      setErrorMessage("");
+      try {
+        const data = await fetchMovies('');
+        setMovieList(data.results || []);
+      } catch (error) {
+        setErrorMessage(error.message || "Error fetching movies");
+        setMovieList([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getMovies();
+  }, []);
 
   // Выполнится 1 раз при монтировании
   useEffect(() => {
