@@ -30,6 +30,6 @@ export const fetchMovies = async (query = '') => { // query = '' парамет�
 
   const data = await response.json(); // Ответ с API получен
 
-  return;
+  return data;
   
 };

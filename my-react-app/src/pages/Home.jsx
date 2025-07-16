@@ -6,40 +6,40 @@ import { fetchMovies } from "../services/tmdb-api";
 import { useDebounce } from "react-use";
 import { updateSearchCount, getTrendingMovies } from "../services/appwrite-api";
 
-
-
 const Home = () => {
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [movieList, setMovieList] = useState([]); // Пустой массив "поле состояния", в которое можно получить данные с API
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
   const [trendingMovies, setTrendingMovies] = useState([]);
 
-  setIsLoading(true); // Запуск загрузки
-  setErrorMessage(""); // Пустое поле ошибки
-
   // Хук отложенного поискового запроса на 1 сек
   // Для предотвращения перегрузки запросами апи
   useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm]);
 
   const loadTrendingMovies = async () => {
-    try{
+    try {
       const movies = await getTrendingMovies(); // Обязательно импортируйте функции из appwrite
 
       setTrendingMovies(movies);
-    } catch(error) {
+    } catch (error) {
       console.error(`Error fetching trending movies: ${error}`);
     }
-  }
+  };
+
+  // Выполнится 1 раз при монтировании
 
   useEffect(() => {
-    const getMovies = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       setErrorMessage("");
       try {
-        const data = await fetchMovies('');
+        const data = await fetchMovies(debouncedSearchTerm);
         setMovieList(data.results || []);
+        if (debouncedSearchTerm.trim()) {
+          updateSearchCount(debouncedSearchTerm, data.results[0]);
+        }
       } catch (error) {
         setErrorMessage(error.message || "Error fetching movies");
         setMovieList([]);
@@ -47,16 +47,13 @@ const Home = () => {
         setIsLoading(false);
       }
     };
-    getMovies();
-  }, []);
 
-  // Выполнится 1 раз при монтировании
-  useEffect(() => {
-    fetchMovies(debouncedSearchTerm);
-  }, [debouncedSearchTerm]); 
+    fetchData(debouncedSearchTerm);
+    
+  }, [debouncedSearchTerm]);
 
   useEffect(() => {
-    loadTrendingMovies()
+    loadTrendingMovies();
   }, []);
 
   return (
@@ -78,19 +75,31 @@ const Home = () => {
             <h2>Trending Movies</h2>
 
             <ul>
-              {trendingMovies.map((movie, index) => ( // .map преобразуем массив с БД
-                <li key={movie.$id}>
-                  <p>{index + 1}</p>
-                  <img src={movie.poster_url?.includes('/null') ? '/No-Poster.png' : movie.poster_url} alt={movie.title}/>
-                </li>
-              ))}
+              {trendingMovies.map(
+                (
+                  movie,
+                  index // .map преобразуем массив с БД
+                ) => (
+                  <li key={movie.$id}>
+                    <p>{index + 1}</p>
+                    <img
+                      src={
+                        movie.poster_url?.includes("/null")
+                          ? "/No-Poster.png"
+                          : movie.poster_url
+                      }
+                      alt={movie.title}
+                    />
+                  </li>
+                )
+              )}
             </ul>
           </section>
         )}
 
         <section className="all-movies">
           <h2>All Movies</h2>
-          {isLoading ? ( // Условный рендеринг ? : 
+          {isLoading ? ( // Условный рендеринг ? :
             <Spinner />
           ) : errorMessage ? (
             <p className="text-red-500">{errorMessage}</p>
@@ -98,8 +107,8 @@ const Home = () => {
             <ul>
               {movieList.map(
                 (
-                  movie 
-                ) => (        // () => () способ "немедленного возвращения" при котором не нужен return и чище код
+                  movie // () => () способ "немедленного возвращения" при котором не нужен return и чище код
+                ) => (
                   <MovieCard key={movie.id} movie={movie} /> // Нужен уникальный ключ для каждого элемента .id
                 )
               )}
@@ -112,4 +121,4 @@ const Home = () => {
   );
 };
 
-export default Home 
+export default Home;
