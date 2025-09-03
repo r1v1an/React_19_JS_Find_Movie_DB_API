@@ -28,7 +28,7 @@ const Home = () => {
     }
   };
 
-  // Выполнится 1 раз при монтировании
+  // useEffect() Выполнится 1 раз при монтировании
 
   useEffect(() => {
     const fetchData = async () => {
