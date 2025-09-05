@@ -1,6 +1,10 @@
+import { useMovieContext } from "../contexts/MovieContext"
+
 const MovieCard = ({
   movie: { title, vote_average, poster_path, release_date, original_language },
 }) => {
+
+  const {isFavorite, addToFavorites, removeFromFavorites} = useMovieContext() // Вызов функций из контекста
 
   function onFavoriteClick() {
     alert("clicked")
