@@ -1,13 +1,19 @@
 import { useMovieContext } from "../contexts/MovieContext"
 
 const MovieCard = ({
-  movie: { title, vote_average, poster_path, release_date, original_language },
+  movie
 }) => {
+
+  const { id, title, vote_average, poster_path, release_date, original_language } = movie;
 
   const {isFavorite, addToFavorites, removeFromFavorites} = useMovieContext() // Вызов функций из контекста
 
-  function onFavoriteClick() {
-    alert("clicked")
+  const favorite = isFavorite(movie.id) // Проверка наличия movie.id в списке isFavorite
+
+  function onFavoriteClick(e) {
+    e.preventDefault()
+    if (favorite) removeFromFavorites(movie.id)
+    else addToFavorites(movie)
   }
 
   return (
@@ -17,7 +23,7 @@ const MovieCard = ({
              alt={title}/>
         <div className="movie-overlay">
           <button className="favorite-btn" onClick={onFavoriteClick}>
-            🤍
+            {favorite ? "❤️" : "🤍"}
           </button>
         </div>     
         <div className="mt-4">
