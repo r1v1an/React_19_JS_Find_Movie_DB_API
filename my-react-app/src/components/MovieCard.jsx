@@ -26,7 +26,7 @@ const MovieCard = ({
             {favorite ? "❤️" : "🤍"}
           </button>
         </div>     
-             alt={title}/>   
+
         <div className="mt-4">
             <h3>{title}</h3>
 
