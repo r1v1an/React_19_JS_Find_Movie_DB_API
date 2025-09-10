@@ -1,11 +1,31 @@
+import { useMovieContext } from "../contexts/MovieContext"
+
 const MovieCard = ({
-  movie: { title, vote_average, poster_path, release_date, original_language },
+  movie
 }) => {
+
+  const { id, title, vote_average, poster_path, release_date, original_language } = movie;
+
+  const {isFavorite, addToFavorites, removeFromFavorites} = useMovieContext() // Вызов функций из контекста
+
+  const favorite = isFavorite(movie.id) // Проверка наличия movie.id в списке isFavorite
+
+  function onFavoriteClick(e) {
+    e.preventDefault()
+    if (favorite) removeFromFavorites(movie.id)
+    else addToFavorites(movie)
+  }
 
   return (
     <div className="movie-card">
         <img src={poster_path ? 
                 `https://image.tmdb.org/t/p/w500/${poster_path}` : '/No-Poster.png'} 
+             alt={title}/>
+        <div className="movie-overlay">
+          <button className="favorite-btn" onClick={onFavoriteClick}>
+            {favorite ? "❤️" : "🤍"}
+          </button>
+        </div>     
              alt={title}/>   
         <div className="mt-4">
             <h3>{title}</h3>

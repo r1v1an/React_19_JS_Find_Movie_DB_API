@@ -14,7 +14,6 @@ const API_OPTIONS = {
 
 export const fetchMovies = async (query = '') => { // query = '' параметр поискового запроса
 
-  // используется try и catch для отлова ошибок
   // Конечная точка
   const endpoint = query
     ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}` // encodeURIComponent() кодировка строки в URI
