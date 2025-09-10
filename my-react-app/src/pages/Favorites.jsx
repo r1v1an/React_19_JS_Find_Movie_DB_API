@@ -1,11 +1,14 @@
-import { useMovieContext } from "../contexts/MovieContext"
-import MovieCard from "../components/MovieCard"
+import { useMovieContext } from "../contexts/MovieContext";
+import MovieCard from "../components/MovieCard";
 
-function Favorites(){
-    const {favorites} = useMovieContext();
+function Favorites() {
+  const { favorites } = useMovieContext();
 
-    if (favorites.length > 0) {
-        return  <div className="pattern">
+  if (favorites.length > 0) {
+    return (
+      <div>
+        <div className="pattern"></div>
+        <div className="wrapper flex justify-center">
           <div className="all-movies favorites">
             <h2 className="mt-7">Your Favorites</h2>
             <ul>
@@ -18,16 +21,22 @@ function Favorites(){
               )}
             </ul>
           </div>
-
         </div>
-    }
+      </div>
+    );
+  }
 
-    return <div className="pattern">
+  return (
+    <div>
+      <div className="pattern"></div>
+      <div className="wrapper flex justify-center">
         <div className="all-movies favorites-empty">
-            <h2>No Favorites Movies yet</h2>
-            <p>Start adding movies to your favorites and they will appear here!</p>
-        </div>     
+          <h2>No Favorites Movies yet</h2>
+          <p>Start adding movies to your favorites and they will appear here!</p>
+        </div>
+      </div>
     </div>
+  );
 }
 
-export default Favorites
+export default Favorites;
