@@ -25,8 +25,7 @@ const MovieCard = ({
           <button className="favorite-btn" onClick={onFavoriteClick}>
             {favorite ? "❤️" : "🤍"}
           </button>
-        </div>     
-
+        </div>
         <div className="mt-4">
             <h3>{title}</h3>
 
