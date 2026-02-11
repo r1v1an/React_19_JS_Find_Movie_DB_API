@@ -8,7 +8,7 @@ function Favorites() {
     return (
       <div>
         <div className="pattern"></div>
-        <div className="wrapper flex justify-center">
+        <div className="wrapper">
           <div className="all-movies favorites">
             <h2 className="mt-7">Your Favorites</h2>
             <ul>
@@ -29,7 +29,7 @@ function Favorites() {
   return (
     <div>
       <div className="pattern"></div>
-      <div className="wrapper flex justify-center">
+      <div className="wrapper">
         <div className="all-movies favorites-empty">
           <h2>No Favorites Movies yet</h2>
           <p>Start adding movies to your favorites and they will appear here!</p>
