@@ -7,7 +7,7 @@ const API_OPTIONS = {
   // определяем нужные параметры апи
   method: "GET",
   headers: {
-    accept: "application/xml", // апи отправит объект в формате джсон
+    accept: "application/json", // апи отправит объект в формате джсон
     Authorization: `Bearer ${API_KEY}`, // авторизация апи подтверждает кто хочет отправить запрос
   },
 };
