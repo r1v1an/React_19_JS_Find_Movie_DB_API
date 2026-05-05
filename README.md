@@ -80,8 +80,8 @@
 ### 1. Клонировать репозиторий
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name/my-react-app
+git clone https://github.com/r1v1an/React_19_JS_Find_Movie_DB_API.git
+cd React_19_JS_Find_Movie_DB_API
 ```
 
 ### 2. Установить зависимости
