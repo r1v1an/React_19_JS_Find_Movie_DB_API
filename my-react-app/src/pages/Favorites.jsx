@@ -10,7 +10,7 @@ function Favorites() {
         <div className="pattern"></div>
         <div className="wrapper">
           <div className="all-movies favorites">
-            <h2 className="mt-7">Your Favorites</h2>
+            <h2 className="mt-9">Your Favorites</h2>
             <ul>
               {favorites.map(
                 (
