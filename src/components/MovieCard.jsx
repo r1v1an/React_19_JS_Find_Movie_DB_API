@@ -17,15 +17,17 @@ const MovieCard = ({
   }
 
   return (
-    <div className="movie-card">
+    <div className="movie-card group">
         <img src={poster_path ? 
                 `https://image.tmdb.org/t/p/w500/${poster_path}` : '/No-Poster.png'} 
              alt={title}/>
-        <div className="movie-overlay">
-          <button className="favorite-btn" onClick={onFavoriteClick}>
-            {favorite ? "❤️" : "🤍"}
-          </button>
-        </div>
+        <button 
+          className={`favorite-btn z-20 ${favorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} 
+          onClick={onFavoriteClick}
+        >
+          {favorite ? "❤️" : "🤍"}
+        </button>
+        <div className="movie-overlay"></div>
         <div className="mt-4">
             <h3>{title}</h3>
 

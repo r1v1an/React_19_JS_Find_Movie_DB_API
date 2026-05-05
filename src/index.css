@@ -20,6 +20,11 @@
   --background-image-hero-pattern: url("/hero-bg.png");
 }
 
+@keyframes scroll-ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 @layer base {
   body {
     font-family: "DM Sans", serif;
@@ -62,7 +67,6 @@
 
     & ul {
       @apply flex flex-row overflow-x-auto gap-5 -mt-10 hide-scrollbar;
-
     }
 
     & ul li {
@@ -156,6 +160,12 @@
 
 .movie-card:hover {
   transform: translateY(-5px);
+}
+
+.movie-card.favorite {
+  border: 1.5px solid #AB8BFF;
+  box-shadow: 0 0 20px rgba(171, 139, 255, 0.15);
+  background-color: rgba(171, 139, 255, 0.05);
 }
 
 .movie-overlay {

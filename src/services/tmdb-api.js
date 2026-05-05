@@ -12,12 +12,12 @@ const API_OPTIONS = {
   },
 };
 
-export const fetchMovies = async (query = '') => { // query = '' параметр поискового запроса
+export const fetchMovies = async (query = '', page = 1) => { // query = '' параметр поискового запроса
 
   // Конечная точка
   const endpoint = query
-    ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}` // encodeURIComponent() кодировка строки в URI
-    : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+    ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}` // encodeURIComponent() кодировка строки в URI
+    : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${page}`;
   // /discover/movie + ?sort_by=popularity.desc и /search/movie + ?query=${encodeURIComponent(query)} вариации параметров прописаны в документации апи 
 
   // fetch встроенная функция JS которая позволяет отправлять http запросы GET, POST и т.п. на разные апи или серверы и получить ответ
