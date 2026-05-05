@@ -12,11 +12,22 @@
 
 ## Скриншоты интерфейса
 
+**Главная страница**
 ![Главная страница](./screenshots/home.png)
+
+**Карточки фильмов**
 ![Карточки фильмов](./screenshots/movieCards.png)
+
+**Результаты поиска**
 ![Результаты поиска](./screenshots/searchResults.png)
+
+**Избранное**
 ![Избранное](./screenshots/favorites.png)
+
+**Созданные атрибуты для хранения в Appwrite (BaaS)**
 ![Созданные атрибуты для хранения в Appwrite (BaaS)](./screenshots/appwritePanel.png)
+
+**Собранная статистика поисковых запросов в Appwrite**
 ![Собранная статистика поисковых запросов в Appwrite](./screenshots/appwriteDB.png)
 
 ---
@@ -85,10 +96,10 @@ npm install
 Создай файл `.env.local` в корне проекта:
 
 ```env
-VITE_TMDB_API_KEY=твой_tmdb_bearer_token
-VITE_APPWRITE_PROJECT_ID=твой_appwrite_project_id
-VITE_APPWRITE_DATABASE_ID=твой_appwrite_database_id
-VITE_APPWRITE_COLLECTION_ID=твой_appwrite_collection_id
+VITE_TMDB_API_KEY=YOUR_tmdb_bearer_token
+VITE_APPWRITE_PROJECT_ID=YOUR_appwrite_project_id
+VITE_APPWRITE_DATABASE_ID=YOUR_appwrite_database_id
+VITE_APPWRITE_COLLECTION_ID=YOUR_appwrite_collection_id
 ```
 
 > ⚠️ Никогда не коммить `.env.local` в репозиторий. Он уже добавлен в `.gitignore`.
@@ -108,7 +119,7 @@ npm run dev
 Для работы функции «Трендовые фильмы» создай коллекцию в Appwrite со следующими атрибутами:
 
 | Атрибут | Тип | Required | Special properties |
-|---|---|---|
+|---|---|---|---|
 | `searchTerm` | String | ✅ | Size: 1000 |
 | `count` | Integer | ❌ | Min: -9.22e+18, Max: 9.22e+18 |
 | `movie_id` | Integer | ✅ | Min: -9.22e+18, Max: 9.22e+18 |
@@ -131,6 +142,6 @@ npm run dev
 
 ## Контакты
 
-Если есть вопросы или хочешь сотрудничать — пиши!
+Если есть вопросы или хотите сотрудничать — пишите!
 
 AinurSirazhev@gmail.com
