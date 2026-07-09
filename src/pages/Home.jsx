@@ -3,8 +3,9 @@ import Search from "../components/Search";
 import Spinner from "../components/Spinner";
 import MovieCard from "../components/MovieCard";
 import Trending from "../components/Trending";
-import { fetchMovies } from "../services/tmdb-api";
+import { fetchMovies, SORT_OPTIONS } from "../services/tmdb-api";
 import { useDebounce } from "react-use";
+import SortControls from "../components/SortControls";
 import { updateSearchCount, getTrendingMovies } from "../services/appwrite-api";
 
 const Home = () => {
@@ -17,6 +18,7 @@ const Home = () => {
   const [trendingError, setTrendingError] = useState(false); // Флаг ошибки Appwrite
   const [page, setPage] = useState(1); // Текущая страница результатов
   const [hasMore, setHasMore] = useState(true); // Есть ли еще страницы с результатами
+  const [sortBy, setSortBy] = useState(SORT_OPTIONS.POPULAR); // Текущая сортировка discover
   const observer = useRef(); // Объект IntersectionObserver для отслеживания пересечения с последним элементом списка
 
   // Хук отложенного поискового запроса на 1 сек
@@ -42,18 +44,31 @@ const Home = () => {
     setHasMore(true);
   }, [debouncedSearchTerm]);
 
+  // Сброс при смене сортировки
+  const handleSortChange = useCallback((newSort) => {
+    if (newSort === sortBy) return;
+    setSortBy(newSort);
+    setPage(1);
+    setMovieList([]);
+    setHasMore(true);
+  }, [sortBy]);
+
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setErrorMessage("");
       try { 
-        const data = await fetchMovies(debouncedSearchTerm, page);
+        const data = await fetchMovies(debouncedSearchTerm, page, sortBy);
         
         if (data.results.length === 0 || page >= data.total_pages) {
           setHasMore(false);
         }
 
-        setMovieList(prev => page === 1 ? data.results : [...prev, ...data.results]);
+        setMovieList(prev => {
+          const newList = page === 1 ? data.results : [...prev, ...data.results];
+          return [...new Map(newList.map(m => [m.id, m])).values()];
+        });
         
         if (debouncedSearchTerm.trim() && page === 1 && data.results.length > 0) {
           updateSearchCount(debouncedSearchTerm, data.results[0]);
@@ -68,7 +83,7 @@ const Home = () => {
 
     fetchData();
     
-  }, [debouncedSearchTerm, page]);
+  }, [debouncedSearchTerm, page, sortBy]);
   
   // Использован IntersectionObserver с помощью хука useCallback (lastMovieElementRef), 
   // который отслеживает, доскроллил ли пользователь до последнего элемента в списке.
@@ -108,7 +123,14 @@ const Home = () => {
       <div className="wrapper">
         <section className="all-movies">
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-          <h2>All Movies</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <h2 className="!mb-0">All Movies</h2>
+            <SortControls
+              sortBy={sortBy}
+              onSortChange={handleSortChange}
+              disabled={!!debouncedSearchTerm}
+            />
+          </div>
           {errorMessage && <p className="text-red-500">{errorMessage}</p>}
           
           <ul>

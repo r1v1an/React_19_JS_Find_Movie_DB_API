@@ -231,6 +231,13 @@
   border-radius: 12px;
 }
 
+@media (max-width: 640px) {
+  .favorites-empty {
+    margin: 1rem;
+    margin-top: 4rem;
+  }
+}
+
 .favorites-empty h2 {
   margin-bottom: 1rem;
   font-size: 2rem;
