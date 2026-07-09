@@ -1,12 +1,19 @@
+import type { SortOption } from "../types"
 import { SORT_OPTIONS } from "../services/tmdb-api"
 
-const SORT_BUTTONS = [
+interface SortControlsProps {
+  sortBy: SortOption;
+  onSortChange: (value: SortOption) => void;
+  disabled: boolean;
+}
+
+const SORT_BUTTONS: { key: SortOption; label: string }[] = [
   { key: SORT_OPTIONS.POPULAR, label: "Popular" },
   { key: SORT_OPTIONS.TOP_RATED, label: "Top Rated" },
   { key: SORT_OPTIONS.NEWEST, label: "Newest" },
 ];
 
-const SortControls = ({ sortBy, onSortChange, disabled }) => {
+const SortControls = ({ sortBy, onSortChange, disabled }: SortControlsProps) => {
   return (
     <div className="flex gap-2">
       {SORT_BUTTONS.map(({ key, label }) => (

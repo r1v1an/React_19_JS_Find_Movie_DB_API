@@ -1,4 +1,11 @@
-const Trending = ({ movies, error }) => {
+import type { TrendingMovie } from "../types"
+
+interface TrendingProps {
+  movies: TrendingMovie[];
+  error: boolean;
+}
+
+const Trending = ({ movies, error }: TrendingProps) => {
   if (error) {
     return (
       <section className="trending">

@@ -1,8 +1,9 @@
 import { Client, Databases, ID, Query } from 'appwrite'
+import type { Movie, TrendingMovie } from '../types'
 
-const PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID;
-const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
-const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
+const PROJECT_ID: string = import.meta.env.VITE_APPWRITE_PROJECT_ID;
+const DATABASE_ID: string = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const COLLECTION_ID: string = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
 
 const client = new Client()
     .setEndpoint('https://fra.cloud.appwrite.io/v1')
@@ -10,7 +11,7 @@ const client = new Client()
 
 const database = new Databases(client);
 
-export const updateSearchCount = async (searchTerm, movie) => {
+export const updateSearchCount = async (searchTerm: string, movie: Movie): Promise<void> => {
     // 1. Use Appwrite SDK to check if the search term exists in the database
     try {
         const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [Query.equal('searchTerm', searchTerm),])
@@ -36,14 +37,14 @@ export const updateSearchCount = async (searchTerm, movie) => {
 }
 
 // Параметры не нужны при извлечении из БД appwrite
-export const getTrendingMovies = async () => {
+export const getTrendingMovies = async (): Promise<TrendingMovie[]> => {
     try {
         const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
             Query.limit(10), // Ограничение до 10
             Query.orderDesc("count") // Сортировка по убыванию кол-ва просмотров
         ])
 
-        return result.documents;
+        return result.documents as unknown as TrendingMovie[];
 
     } catch (error) {
         console.error(error);

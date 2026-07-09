@@ -7,19 +7,20 @@ import { fetchMovies, SORT_OPTIONS } from "../services/tmdb-api";
 import { useDebounce } from "react-use";
 import SortControls from "../components/SortControls";
 import { updateSearchCount, getTrendingMovies } from "../services/appwrite-api";
+import type { Movie, SortOption, TrendingMovie } from "../types";
 
 const Home = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [movieList, setMovieList] = useState([]); // Пустой массив "поле состояния", в которое можно получить данные с API
+  const [movieList, setMovieList] = useState<Movie[]>([]); // Пустой массив "поле состояния", в которое можно получить данные с API
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
-  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
   const [trendingError, setTrendingError] = useState(false); // Флаг ошибки Appwrite
   const [page, setPage] = useState(1); // Текущая страница результатов
   const [hasMore, setHasMore] = useState(true); // Есть ли еще страницы с результатами
-  const [sortBy, setSortBy] = useState(SORT_OPTIONS.POPULAR); // Текущая сортировка discover
-  const observer = useRef(); // Объект IntersectionObserver для отслеживания пересечения с последним элементом списка
+  const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTIONS.POPULAR); // Текущая сортировка discover
+  const observer = useRef<IntersectionObserver | null>(null); // Объект IntersectionObserver для отслеживания пересечения с последним элементом списка
 
   // Хук отложенного поискового запроса на 1 сек
   // Для предотвращения перегрузки запросами апи
@@ -45,7 +46,7 @@ const Home = () => {
   }, [debouncedSearchTerm]);
 
   // Сброс при смене сортировки
-  const handleSortChange = useCallback((newSort) => {
+  const handleSortChange = useCallback((newSort: SortOption) => {
     if (newSort === sortBy) return;
     setSortBy(newSort);
     setPage(1);
@@ -74,7 +75,7 @@ const Home = () => {
           updateSearchCount(debouncedSearchTerm, data.results[0]);
         }
       } catch (error) {
-        setErrorMessage(error.message || "Error fetching movies");
+        setErrorMessage((error as Error).message || "Error fetching movies");
         if (page === 1) setMovieList([]);
       } finally {
         setIsLoading(false);
@@ -87,7 +88,7 @@ const Home = () => {
   
   // Использован IntersectionObserver с помощью хука useCallback (lastMovieElementRef), 
   // который отслеживает, доскроллил ли пользователь до последнего элемента в списке.
-  const lastMovieElementRef = useCallback(node => { 
+  const lastMovieElementRef = useCallback((node: HTMLDivElement | null) => { 
     if (isLoading) return;
     if (observer.current) observer.current.disconnect();
     

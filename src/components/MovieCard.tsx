@@ -1,17 +1,21 @@
-import { useMovieContext } from "../contexts/MovieContext"
 import { useState, useCallback } from "react"
+import type { Movie, MovieDetails } from "../types"
 import MovieDetailsModal from "./MovieDetailsModal"
 import { fetchMovieDetails } from "../services/tmdb-api"
 import FavoriteButton from "./FavoriteButton"
 
-const MovieCard = ({ movie }) => {
+interface MovieCardProps {
+  movie: Movie;
+}
+
+const MovieCard = ({ movie }: MovieCardProps) => {
 
   const { id, title, vote_average, poster_path, release_date, original_language } = movie;
 
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [details, setDetails] = useState(null);
+  const [details, setDetails] = useState<MovieDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
-  const [detailsError, setDetailsError] = useState(null);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
 
   const handleCardClick = useCallback(async () => {
     setDetailsOpen(true);
@@ -20,8 +24,8 @@ const MovieCard = ({ movie }) => {
     try {
       const data = await fetchMovieDetails(movie.id);
       setDetails(data);
-    } catch (err) {
-      setDetailsError(err.message);
+    } catch (err: unknown) {
+      setDetailsError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
       setDetailsLoading(false);
     }

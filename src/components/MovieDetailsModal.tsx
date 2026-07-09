@@ -1,8 +1,17 @@
+import type { Movie, MovieDetails, Genre, ProductionCompany } from "../types"
 import FavoriteButton from "./FavoriteButton"
 import CloseButton from "./CloseButton"
 import Spinner from "./Spinner"
 
-const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClose }) => {
+interface MovieDetailsModalProps {
+  movie: Movie;
+  details: MovieDetails | null;
+  detailsLoading: boolean;
+  detailsError: string | null;
+  onClose: () => void;
+}
+
+const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClose }: MovieDetailsModalProps) => {
 
   // ========== LOADING STATE ==========
   if (detailsLoading) {
@@ -90,7 +99,7 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
     ? new Intl.DisplayNames(["en"], { type: "language" }).of(original_language)
     : "N/A";
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount: number | undefined): string => {
     if (!amount || amount === 0) return "N/A";
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -148,7 +157,7 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
 
               {genres && genres.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {genres.map((genre) => (
+                {genres.map((genre: Genre) => (
                     <span key={genre.id} className="px-3 py-1 text-xs font-medium rounded-full bg-light-100/10 text-light-100 border border-light-100/20">
                       {genre.name}
                     </span>
@@ -178,7 +187,7 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
                   <div className="col-span-2">
                     <p className="text-xs text-gray-100 uppercase tracking-wider">Production</p>
                     <p className="text-white font-semibold text-sm">
-                      {production_companies.map((c) => c.name).join(", ")}
+                      {production_companies.map((c: ProductionCompany) => c.name).join(", ")}
                     </p>
                   </div>
                 )}

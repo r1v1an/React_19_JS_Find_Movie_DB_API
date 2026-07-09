@@ -1,9 +1,11 @@
 // Подключение API TMDB
+import type { Movie, MovieDetails, TMDBResponse, SortOption } from "../types";
+
 const API_BASE_URL = "https://api.themoviedb.org/3"; // сперва отправляем базовый url запрос
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY; // затем ипортируем апи ключ расположенный в .env.local
 
-const API_OPTIONS = {
+const API_OPTIONS: RequestInit = {
   // определяем нужные параметры апи
   method: "GET",
   headers: {
@@ -12,7 +14,7 @@ const API_OPTIONS = {
   },
 };
 
-export const fetchMovieDetails = async (movieId) => {
+export const fetchMovieDetails = async (movieId: number): Promise<MovieDetails> => {
   const endpoint = `${API_BASE_URL}/movie/${movieId}?language=en-US`;
   const response = await fetch(endpoint, API_OPTIONS);
 
@@ -20,11 +22,11 @@ export const fetchMovieDetails = async (movieId) => {
     throw new Error("Failed to fetch movie details");
   }
 
-  const data = await response.json();
+  const data: MovieDetails = await response.json();
   return data;
 };
 
-export const fetchMovies = async (query = '', page = 1, sortBy = 'popularity.desc') => { // query = '' параметр поискового запроса
+export const fetchMovies = async (query = '', page = 1, sortBy: SortOption = 'popularity.desc'): Promise<TMDBResponse> => { // query = '' параметр поискового запроса
 
   // Дополнительные параметры для /discover/movie
   let extraParams = '';
@@ -32,8 +34,7 @@ export const fetchMovies = async (query = '', page = 1, sortBy = 'popularity.des
     // Для Top Rated: минимум 10000 голосов и рейтинг от 7
     extraParams = '&vote_count.gte=10000';
   } else if (sortBy === 'primary_release_date.desc') {
-    // Для Newest: фильтруем фильмы, которые уже вышли (дата релиза не позднее сегодня)
-    // и имеют минимум 100 голосов (исключает N/A и малые выборки)
+    // Для Newest: только уже вышедшие фильмы + минимум 100 голосов
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     extraParams = `&primary_release_date.lte=${today}&vote_count.gte=100`;
   }
@@ -51,13 +52,13 @@ export const fetchMovies = async (query = '', page = 1, sortBy = 'popularity.des
     throw new Error("Failed to fetch movies");
   }
 
-  const data = await response.json(); // Ответ с API получен
+  const data: TMDBResponse = await response.json(); // Ответ с API получен
 
   return data;
   
 };
 
-export const SORT_OPTIONS = {
+export const SORT_OPTIONS: Record<string, SortOption> = {
   POPULAR: 'popularity.desc',
   TOP_RATED: 'vote_average.desc',
   NEWEST: 'primary_release_date.desc',

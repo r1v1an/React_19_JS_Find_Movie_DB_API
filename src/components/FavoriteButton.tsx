@@ -1,10 +1,16 @@
 import { useMovieContext } from "../contexts/MovieContext"
+import type { Movie } from "../types"
 
-const FavoriteButton = ({ movie, className = "" }) => {
+interface FavoriteButtonProps {
+  movie: Movie;
+  className?: string;
+}
+
+const FavoriteButton = ({ movie, className = "" }: FavoriteButtonProps) => {
   const { isFavorite, addToFavorites, removeFromFavorites } = useMovieContext();
   const favorite = isFavorite(movie.id);
 
-  function onClick(e) {
+  function onClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     if (favorite) removeFromFavorites(movie.id);
