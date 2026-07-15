@@ -27,11 +27,11 @@ const Home = () => {
   // Для предотвращения перегрузки запросами апи
   // Сброс page, movieList и hasMore происходит здесь, а не в отдельном эффекте
   useDebounce(() => {
-    if (!searchTerm) return; // Не сбрасываем при пустом поиске (discover mode)
     setPage(1);
-    setMovieList([]);
     setHasMore(true);
     setDebouncedSearchTerm(searchTerm);
+    if (!searchTerm) return; // Не очищаем список при пустом поиске (discover mode)
+    setMovieList([]);
   }, 1000, [searchTerm]);
 
   const loadTrendingMovies = useCallback(async (period: TrendingPeriod) => {
