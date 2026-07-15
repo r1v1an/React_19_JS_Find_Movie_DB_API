@@ -7,10 +7,11 @@ interface SearchProps {
 const Search = ({searchTerm, setSearchTerm}: SearchProps) => { // И не нужно писать props! Но и дочерний компонент searchTerm нельзя изменять т.к. он доступен только для чтения и может менять его значения в разных местах
 
     return (
-        <div className='search'>
+        <div className='search mt-0 pt-0 pb-0'>
             <div>
                 <img src="./search.svg" alt="Search" />
-                <input  name="Search placeholder"
+                <input  className='pt-3 pb-3'
+                        name="Search placeholder"
                         type="text" 
                         placeholder='Search through thousands of movies'
                         value={searchTerm}

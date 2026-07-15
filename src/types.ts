@@ -65,6 +65,10 @@ export const SORT_OPTIONS: Record<string, SortOption> = {
   NEWEST: 'primary_release_date.desc',
 };
 
+// ========== Trending period ==========
+
+export type TrendingPeriod = 'all' | 'daily';
+
 // ========== Context types ==========
 
 export interface MovieContextValue {

@@ -6,8 +6,8 @@ import Trending from "../components/Trending";
 import { fetchMovies, SORT_OPTIONS } from "../services/tmdb-api";
 import { useDebounce } from "react-use";
 import SortControls from "../components/SortControls";
-import { updateSearchCount, getTrendingMovies } from "../services/appwrite-api";
-import type { Movie, SortOption, TrendingMovie } from "../types";
+import { updateSearchCount, getTrendingMovies, getDailyTrendingMovies, logSearchTerm } from "../services/appwrite-api";
+import type { Movie, SortOption, TrendingMovie, TrendingPeriod } from "../types";
 
 const Home = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -17,6 +17,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(false); // "Состояние загрузки" во время получении данных с API
   const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
   const [trendingError, setTrendingError] = useState(false); // Флаг ошибки Appwrite
+  const [trendingPeriod, setTrendingPeriod] = useState<TrendingPeriod>("all"); // Период трендов
   const [page, setPage] = useState(1); // Текущая страница результатов
   const [hasMore, setHasMore] = useState(true); // Есть ли еще страницы с результатами
   const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTIONS.POPULAR); // Текущая сортировка discover
@@ -26,15 +27,20 @@ const Home = () => {
   // Для предотвращения перегрузки запросами апи
   useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm]);
 
-  const loadTrendingMovies = async () => {
+  const loadTrendingMovies = useCallback(async (period: TrendingPeriod) => {
     try {
-      const movies = await getTrendingMovies();
-      setTrendingMovies(movies ?? []); // ?? [] защита от undefined на случай сбоя API
+      if (period === "daily") {
+        const movies = await getDailyTrendingMovies();
+        setTrendingMovies(movies ?? []);
+      } else {
+        const movies = await getTrendingMovies();
+        setTrendingMovies(movies ?? []); // ?? [] защита от undefined на случай сбоя API
+      }
     } catch (error) {
       console.error(`Error fetching trending movies: ${error}`);
       setTrendingError(true); // Показываем пользователю сообщение об ошибке
     }
-  };
+  }, []);
 
   // useEffect() Выполнится 1 раз при монтировании
 
@@ -50,10 +56,16 @@ const Home = () => {
     if (newSort === sortBy) return;
     setSortBy(newSort);
     setPage(1);
-    setMovieList([]);
     setHasMore(true);
   }, [sortBy]);
 
+  // Переключение периода трендов
+  const handleTrendingPeriodChange = useCallback((period: TrendingPeriod) => {
+    if (period === trendingPeriod) return;
+    setTrendingPeriod(period);
+    setTrendingError(false);
+    loadTrendingMovies(period);
+  }, [trendingPeriod, loadTrendingMovies]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,6 +85,7 @@ const Home = () => {
         
         if (debouncedSearchTerm.trim() && page === 1 && data.results.length > 0) {
           updateSearchCount(debouncedSearchTerm, data.results[0]);
+          logSearchTerm(debouncedSearchTerm, data.results[0]);
         }
       } catch (error) {
         setErrorMessage((error as Error).message || "Error fetching movies");
@@ -102,8 +115,8 @@ const Home = () => {
   }, [isLoading, hasMore]);
 
   useEffect(() => {
-    loadTrendingMovies();
-  }, []);
+    loadTrendingMovies(trendingPeriod);
+  }, []); // только при монтировании
 
   return (
     <main className="main-content">
@@ -119,9 +132,14 @@ const Home = () => {
         </header>
       </div>
 
-      <Trending movies={trendingMovies} error={trendingError}/>
+      <Trending
+        movies={trendingMovies}
+        error={trendingError}
+        period={trendingPeriod}
+        onPeriodChange={handleTrendingPeriodChange}
+      />
 
-      <div className="wrapper">
+      <div className="wrapper pt-0">
         <section className="all-movies">
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -134,7 +152,7 @@ const Home = () => {
           </div>
           {errorMessage && <p className="text-red-500">{errorMessage}</p>}
           
-          <ul>
+          <ul className={isLoading ? "opacity-50 pointer-events-none transition-opacity duration-300" : "transition-opacity duration-300"}>
             {movieList.map((movie, index) => {
               if (movieList.length === index + 1) {
                 return (
