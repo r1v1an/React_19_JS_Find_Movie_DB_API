@@ -14,7 +14,7 @@ const TrendingControls = ({ period, onPeriodChange }: TrendingControlsProps) => 
   return (
     <div className="flex gap-2">
       {PERIOD_BUTTONS.map(({ key, label }) => (
-        <button
+        <button type="button"
           key={key}
           onClick={() => onPeriodChange(key)}
           className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-all duration-200 cursor-pointer

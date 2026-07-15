@@ -5,7 +5,7 @@ interface CloseButtonProps {
 
 const CloseButton = ({ onClick, className = "" }: CloseButtonProps) => {
   return (
-    <button
+    <button type="button" aria-label="Close"
       onClick={onClick}
       className={`absolute top-4 right-4 z-20 size-10 rounded-full bg-black/50 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/80 transition-all ${className}`}
     >

@@ -18,7 +18,7 @@ const FavoriteButton = ({ movie, className = "" }: FavoriteButtonProps) => {
   }
 
   return (
-    <button
+    <button type="button"
       className={`favorite-btn z-20
         transition-all duration-200
         ${favorite

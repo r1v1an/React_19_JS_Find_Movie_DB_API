@@ -59,7 +59,7 @@ export interface TrendingMovie {
 
 export type SortOption = 'popularity.desc' | 'vote_average.desc' | 'primary_release_date.desc';
 
-export const SORT_OPTIONS: Record<string, SortOption> = {
+const SORT_OPTIONS: Record<string, SortOption> = {
   POPULAR: 'popularity.desc',
   TOP_RATED: 'vote_average.desc',
   NEWEST: 'primary_release_date.desc',

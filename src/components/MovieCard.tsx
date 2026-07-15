@@ -39,7 +39,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
   return (
     <>
-      <div className="movie-card group cursor-pointer" onClick={handleCardClick}>
+      <div className="movie-card group cursor-pointer" onClick={handleCardClick} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(); }}>
         <img
           src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : '/No-Poster.png'}
           alt={title}

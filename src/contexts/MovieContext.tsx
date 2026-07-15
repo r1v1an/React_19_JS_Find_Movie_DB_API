@@ -21,7 +21,7 @@ export const MovieProvider = ({ children }: { children: ReactNode }) => {
     // localStorage позволяет хранить данные в браузере ТОЛЬКО в виде строк.
     if (!isMounted.current) {
       // Проверяем, не монтировались ли уже
-      const storedFavs = localStorage.getItem("favorites"); // проверка наличия данных по ключу "favorites"
+      const storedFavs = localStorage.getItem("favorites:v1"); // проверка наличия данных по ключу "favorites:v1"
 
       if (storedFavs) {
         setFavorites(JSON.parse(storedFavs) as Movie[]); // JSON.parse преобразует строку storedFavs в объект
@@ -32,7 +32,7 @@ export const MovieProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (isMounted.current) {    // Сохраняем только после монтирования
-      localStorage.setItem("favorites", JSON.stringify(favorites)); // JSON.stringify преобразование обратно в строку
+      localStorage.setItem("favorites:v1", JSON.stringify(favorites)); // JSON.stringify преобразование обратно в строку. v1 — версионирование для защиты от сбоев при смене схемы
     } 
   }, [favorites]);
   // Каждый раз когда состояние favorites меняется хуки useEffect() преобразуют и обновляют локальное хранилище

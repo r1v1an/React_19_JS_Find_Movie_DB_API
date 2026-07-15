@@ -3,6 +3,19 @@ import FavoriteButton from "./FavoriteButton"
 import CloseButton from "./CloseButton"
 import Spinner from "./Spinner"
 
+// Hoisted Intl formatters — создаются один раз на уровне модуля
+const languageFormatter = new Intl.DisplayNames(["en"], { type: "language" });
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+const formatCurrency = (amount: number | undefined): string => {
+  if (!amount || amount === 0) return "N/A";
+  return currencyFormatter.format(amount);
+};
+
 interface MovieDetailsModalProps {
   movie: Movie;
   details: MovieDetails | null;
@@ -16,7 +29,7 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
   // ========== LOADING STATE ==========
   if (detailsLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
         <div className="bg-dark-100 p-8 rounded-2xl border border-white/10" onClick={(e) => e.stopPropagation()}>
           <Spinner />
         </div>
@@ -33,11 +46,11 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
     const fallbackYear = movie.release_date ? movie.release_date.split("-")[0] : "N/A";
     const fallbackRating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
     const fallbackLang = movie.original_language
-      ? new Intl.DisplayNames(["en"], { type: "language" }).of(movie.original_language)
+      ? languageFormatter.of(movie.original_language)
       : "N/A";
 
     return (
-      <div className="fixed inset-0 z-40 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="fixed inset-0 z-40 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
         <div className="relative w-full max-w-md p-8 rounded-2xl bg-dark-100 border border-white/10 shadow-2xl text-center" onClick={(e) => e.stopPropagation()}>
           <CloseButton onClick={onClose} />
 
@@ -96,20 +109,11 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
   const hours = runtime ? Math.floor(runtime / 60) : 0;
   const mins = runtime ? runtime % 60 : 0;
   const langName = original_language
-    ? new Intl.DisplayNames(["en"], { type: "language" }).of(original_language)
+    ? languageFormatter.of(original_language)
     : "N/A";
 
-  const formatCurrency = (amount: number | undefined): string => {
-    if (!amount || amount === 0) return "N/A";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   return (
-    <div className="fixed inset-0 z-40 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
+    <div className="fixed inset-0 z-40 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm overflow-y-auto" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
       <div className="relative w-full max-w-3xl rounded-2xl bg-dark-100 border border-white/10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose} />
 

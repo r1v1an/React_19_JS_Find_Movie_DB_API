@@ -25,7 +25,14 @@ const Home = () => {
 
   // Хук отложенного поискового запроса на 1 сек
   // Для предотвращения перегрузки запросами апи
-  useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm]);
+  // Сброс page, movieList и hasMore происходит здесь, а не в отдельном эффекте
+  useDebounce(() => {
+    if (!searchTerm) return; // Не сбрасываем при пустом поиске (discover mode)
+    setPage(1);
+    setMovieList([]);
+    setHasMore(true);
+    setDebouncedSearchTerm(searchTerm);
+  }, 1000, [searchTerm]);
 
   const loadTrendingMovies = useCallback(async (period: TrendingPeriod) => {
     try {
@@ -41,15 +48,6 @@ const Home = () => {
       setTrendingError(true); // Показываем пользователю сообщение об ошибке
     }
   }, []);
-
-  // useEffect() Выполнится 1 раз при монтировании
-
-  // Сброс страницы при новом поиске
-  useEffect(() => {
-    setPage(1);
-    setMovieList([]);
-    setHasMore(true);
-  }, [debouncedSearchTerm]);
 
   // Сброс при смене сортировки
   const handleSortChange = useCallback((newSort: SortOption) => {
@@ -116,7 +114,7 @@ const Home = () => {
 
   useEffect(() => {
     loadTrendingMovies(trendingPeriod);
-  }, []); // только при монтировании
+  }, [trendingPeriod, loadTrendingMovies]);
 
   return (
     <main className="main-content">

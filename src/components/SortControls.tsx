@@ -17,7 +17,7 @@ const SortControls = ({ sortBy, onSortChange, disabled }: SortControlsProps) => 
   return (
     <div className="flex gap-2">
       {SORT_BUTTONS.map(({ key, label }) => (
-        <button
+        <button type="button"
           key={key}
           onClick={() => onSortChange(key)}
           disabled={disabled}
