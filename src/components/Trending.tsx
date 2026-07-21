@@ -37,7 +37,7 @@ const Trending = ({ movies, error, period, onPeriodChange }: TrendingProps) => {
           </p>
         </div>
       ) : (
-        <ul className="!overflow-visible !w-max animate-[scroll-ticker_25s_linear_infinite] hover:[animation-play-state:paused]">
+        <ul className="!overflow-visible !w-max animate-[scroll-ticker_25s_linear_infinite]">
           {/* Оригинальный список */}
           {movies.map((movie, index) => (
             <li key={movie.$id}>

@@ -26,4 +26,5 @@ plans
 .agents
 .claude 
 .clinerules
+.kilo
 skills-lock.json
