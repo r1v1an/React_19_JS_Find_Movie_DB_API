@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import type { Movie, MovieDetails, Genre, ProductionCompany } from "../types"
 import FavoriteButton from "./FavoriteButton"
 import CloseButton from "./CloseButton"
@@ -25,11 +26,22 @@ interface MovieDetailsModalProps {
 }
 
 const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClose }: MovieDetailsModalProps) => {
+  const [imgNatural, setImgNatural] = useState<{ w: number; h: number } | null>(null);
+
+  const [isPortrait, setIsPortrait] = useState(
+    () => typeof window !== "undefined" && window.innerHeight > window.innerWidth
+  );
+
+  useEffect(() => {
+    const onResize = () => setIsPortrait(window.innerHeight > window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // ========== LOADING STATE ==========
   if (detailsLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
         <div className="bg-dark-100 p-8 rounded-2xl border border-white/10" onClick={(e) => e.stopPropagation()}>
           <Spinner />
         </div>
@@ -50,7 +62,7 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
       : "N/A";
 
     return (
-      <div className="fixed inset-0 z-40 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
+      <div className="fixed inset-0 z-40 flex items-center justify-center sm:pt-6 p-4 bg-black/70 backdrop-blur-sm" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
         <div className="relative w-full max-w-md p-8 rounded-2xl bg-dark-100 border border-white/10 shadow-2xl text-center" onClick={(e) => e.stopPropagation()}>
           <CloseButton onClick={onClose} />
 
@@ -82,7 +94,6 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
   const {
     id,
     title,
-    poster_path,
     backdrop_path,
     vote_average,
     release_date,
@@ -96,13 +107,15 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
     production_companies,
   } = details;
 
-  const posterUrl = poster_path
-    ? `https://image.tmdb.org/t/p/w500/${poster_path}`
-    : "/No-Poster.png";
-
   const backdropUrl = backdrop_path
     ? `https://image.tmdb.org/t/p/w1280/${backdrop_path}`
     : null;
+
+  const posterFallbackUrl = movie.poster_path
+    ? `https://image.tmdb.org/t/p/w500/${movie.poster_path}`
+    : null;
+
+  const modalBgUrl = backdropUrl ?? posterFallbackUrl;
 
   const year = release_date ? release_date.split("-")[0] : "N/A";
   const rating = vote_average ? vote_average.toFixed(1) : "N/A";
@@ -112,96 +125,139 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
     ? languageFormatter.of(original_language)
     : "N/A";
 
+  const aspectRatio = imgNatural ? imgNatural.w / imgNatural.h : 16 / 9;
+  const isImagePortrait = imgNatural ? imgNatural.h > imgNatural.w : false;
+
+  // Вычисляем размеры модалки
+  const modalStyle: React.CSSProperties = {};
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 720;
+
+  if (isPortrait) {
+    // Мобильные / планшеты: высота 70vh, ширина = ширина экрана минус margin
+    modalStyle.height = "70vh";
+    modalStyle.maxWidth = "calc(100vw - 1.5rem)";
+  } else {
+    // Десктоп:
+    const maxW = Math.min(vw * 0.9, 1200);
+    const maxH = vh * 0.85;
+
+    if (isImagePortrait) {
+      // Картинка вертикальная (например 9x16) → лимитируем по высоте, ширину вычисляем
+      const h = maxH;
+      const w = h * aspectRatio; // aspectRatio < 1, ширина будет меньше
+      modalStyle.width = `${w}px`;
+      modalStyle.height = `${h}px`;
+    } else {
+      // Горизонтальная картинка → лимитируем по ширине, высоту вычисляем
+      let h = maxW / aspectRatio;
+      if (h > maxH) h = maxH;
+      modalStyle.width = `${maxW}px`;
+      modalStyle.height = `${h}px`;
+    }
+  }
+
   return (
-    <div className="fixed inset-0 z-40 flex items-start justify-center pt-20 pb-8 bg-black/70 backdrop-blur-sm overflow-y-auto" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
-      <div className="relative w-full max-w-3xl rounded-2xl bg-dark-100 border border-white/10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-40 flex items-center justify-center sm:mt-8 p-3 sm:p-6 bg-black/70 backdrop-blur-sm overflow-y-auto" onClick={onClose} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }} aria-label="Close modal">
+      <div
+        className="relative w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+        style={modalStyle}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Фон во всю высоту модалки */}
+        {modalBgUrl && (
+          <img
+            src={modalBgUrl}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) {
+                setImgNatural({ w: img.naturalWidth, h: img.naturalHeight });
+              }
+            }}
+          />
+        )}
+        {/* Затемнение: градиент от прозрачного сверху до тёмного снизу */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
         <CloseButton onClick={onClose} />
 
-        {/* Backdrop */}
-        {backdropUrl && (
-          <div className="relative w-full h-40 sm:h-48 overflow-hidden rounded-t-2xl">
-            <img src={backdropUrl} alt={title} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-dark-100 via-dark-100/50 to-transparent" />
-          </div>
-        )}
-
-        <div className="p-6">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
-            {/* Poster + FavoriteButton */}
-            <div className="flex-shrink-0 mx-auto sm:mx-0 relative z-10 group sm:mt-1 p-6">
-              <img
-                src={posterUrl}
-                alt={title}
-                className="w-40 h-60 sm:w-44 sm:h-[264px] rounded-xl object-cover shadow-lg border border-white/10"
+        <div className="relative p-5 sm:p-8 flex flex-col h-full overflow-y-auto pt-16 sm:pt-20">
+          {/* ===== HERO — контент поверх фона ===== */}
+          <div className="relative z-10 flex-1">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight drop-shadow-lg flex items-center gap-3 flex-wrap">
+              <span>{title}</span>
+              <FavoriteButton
+                movie={movie}
+                variant="modal"
+                className="opacity-100 transition-all duration-200 flex-shrink-0 text-lg"
               />
-              <FavoriteButton movie={movie} />
-            </div>
+            </h2>
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">{title}</h2>
-              {tagline && <p className="text-light-200 italic text-sm mb-3">&ldquo;{tagline}&rdquo;</p>}
+            {tagline && <p className="text-light-200 italic text-sm drop-shadow mt-1">&ldquo;{tagline}&rdquo;</p>}
 
-              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-100 mb-4">
-                <div className="flex items-center gap-1">
-                  <img src="star-img.svg" alt="Star" className="size-4" />
-                  <span className="font-bold text-white">{rating}</span>
-                </div>
-                <span>•</span>
-                <span>{year}</span>
-                {runtime > 0 && (
-                  <>
-                    <span>•</span>
-                    <span>{hours}h {mins}m</span>
-                  </>
-                )}
-                <span>•</span>
-                <span className="capitalize">{langName}</span>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/90 mt-3 drop-shadow">
+              <div className="flex items-center gap-1">
+                <img src="star-img.svg" alt="Star" className="size-4" />
+                <span className="font-bold text-white">{rating}</span>
               </div>
-
-              {genres && genres.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                {genres.map((genre: Genre) => (
-                    <span key={genre.id} className="px-3 py-1 text-xs font-medium rounded-full bg-light-100/10 text-light-100 border border-light-100/20">
-                      {genre.name}
-                    </span>
-                  ))}
-                </div>
+              <span aria-hidden="true">•</span>
+              <span>{year}</span>
+              {runtime > 0 && (
+                <>
+                  <span aria-hidden="true">•</span>
+                  <span>{hours}h {mins}m</span>
+                </>
               )}
-
-              <div className="mb-4">
-                <h3 className="text-white font-semibold mb-1">Overview</h3>
-                {overview ? (
-                  <p className="text-gray-100 text-sm leading-relaxed">{overview}</p>
-                ) : (
-                  <p className="text-gray-100/40 text-sm italic">No overview available</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-black/20 border border-white/5">
-                <div>
-                  <p className="text-xs text-gray-100 uppercase tracking-wider">Budget</p>
-                  <p className="text-white font-semibold">{formatCurrency(budget)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-100 uppercase tracking-wider">Revenue</p>
-                  <p className="text-white font-semibold">{formatCurrency(revenue)}</p>
-                </div>
-                {production_companies && production_companies.length > 0 && (
-                  <div className="col-span-2">
-                    <p className="text-xs text-gray-100 uppercase tracking-wider">Production</p>
-                    <p className="text-white font-semibold text-sm">
-                      {production_companies.map((c: ProductionCompany) => c.name).join(", ")}
-                    </p>
-                  </div>
-                )}
-              </div>
+              <span aria-hidden="true">•</span>
+              <span className="capitalize">{langName}</span>
             </div>
+
+            {genres && genres.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {genres.map((genre: Genre) => (
+                  <span key={genre.id} className="px-3 py-1 text-xs font-medium rounded-full bg-black/40 text-white border border-white/20 backdrop-blur-sm">
+                    {genre.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ===== Overview — поверх фона с лёгкой тенью ===== */}
+          <div className="relative z-10 mt-4">
+            {overview && (
+              <p className="text-white text-sm leading-relaxed max-w-prose drop-shadow-md">
+                {overview}
+              </p>
+            )}
+          </div>
+
+          {/* ===== Статистика — компактные чипы поверх фона ===== */}
+          <div className="relative z-10 mt-4 flex flex-wrap gap-3">
+            <div className="rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 px-3 py-2">
+              <p className="text-[10px] text-gray-100/60 uppercase tracking-wider">Budget</p>
+              <p className="text-white font-semibold text-xs">{formatCurrency(budget)}</p>
+            </div>
+            <div className="rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 px-3 py-2">
+              <p className="text-[10px] text-gray-100/60 uppercase tracking-wider">Revenue</p>
+              <p className="text-white font-semibold text-xs">{formatCurrency(revenue)}</p>
+            </div>
+            {production_companies && production_companies.length > 0 && (
+              <div className="rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 px-3 py-2">
+                <p className="text-[10px] text-gray-100/60 uppercase tracking-wider">Production</p>
+                <p className="text-white text-xs">
+                  {production_companies.map((c: ProductionCompany) => c.name).join(", ")}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
 
 export default MovieDetailsModal;
