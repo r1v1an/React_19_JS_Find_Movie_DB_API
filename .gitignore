@@ -13,6 +13,11 @@ dist
 dist-ssr
 plans
 *.local
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+*.tgz
 
 # Editor directories and files
 .vscode/*
@@ -29,3 +34,4 @@ plans
 .clinerules
 .kilo
 skills-lock.json
+react-doctor-report.json
