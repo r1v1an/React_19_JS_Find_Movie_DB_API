@@ -67,7 +67,7 @@ export async function saveSearch(db, { metrics, logs }, { query, eventId }, movi
       ...metrics,
       queries: [Query.equal("searchTerm", query), Query.limit(1)],
     });
-    const transaction = await db.createTransaction({ ttl: 30 });
+    const transaction = await db.createTransaction({ ttl: 60 });
     const transactionId = transaction.$id;
 
     try {

@@ -116,7 +116,10 @@ test("validates the movie with TMDB and records each event exactly once", async 
   t.mock.method(TablesDB.prototype, "listRows", async ({ tableId }) => ({
     rows: tableId === "metrics" ? [{ $id: "existing-metric" }] : saved ? [{ $id: eventId }] : [],
   }));
-  t.mock.method(TablesDB.prototype, "createTransaction", async () => ({ $id: "transaction" }));
+  t.mock.method(TablesDB.prototype, "createTransaction", async ({ ttl }) => {
+    assert.equal(ttl, 60);
+    return { $id: "transaction" };
+  });
   t.mock.method(TablesDB.prototype, "createOperations", async ({ transactionId, operations }) => {
     assert.equal(transactionId, "transaction");
     assert.deepEqual(operations, [
