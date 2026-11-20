@@ -41,7 +41,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     <>
       <div className="movie-card group cursor-pointer" onClick={handleCardClick} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(); }}>
         <img
-          src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : '/No-Poster.png'}
+          src={poster_path ? `https://image.tmdb.org/t/p/w500${poster_path}` : `${import.meta.env.BASE_URL}No-Poster.png`}
           alt={title}
         />
         <FavoriteButton movie={movie} />
@@ -50,7 +50,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           <h3>{title}</h3>
           <div className="content">
             <div className="rating">
-              <img src="star-img.svg" alt="Star icon" />
+              <img src={`${import.meta.env.BASE_URL}star-img.svg`} alt="Star icon" />
               <p>{vote_average ? vote_average.toFixed(2) : 'N/A'}</p>
             </div>
             <span>•</span>

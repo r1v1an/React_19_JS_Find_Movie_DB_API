@@ -43,12 +43,8 @@ const Trending = ({ movies, error, period, onPeriodChange }: TrendingProps) => {
             <li key={movie.$id}>
               <p>{index + 1}</p>
               <img
-                src={
-                  movie.poster_url?.includes("/null")
-                    ? "/No-Poster.png"
-                    : movie.poster_url
-                }
-                alt={movie.title}
+                src={movie.poster_url ?? `${import.meta.env.BASE_URL}No-Poster.png`}
+                alt="Movie poster"
               />
             </li>
           ))}
@@ -58,12 +54,8 @@ const Trending = ({ movies, error, period, onPeriodChange }: TrendingProps) => {
             <li key={`dup-${movie.$id}`} aria-hidden="true">
               <p>{index + 1}</p>
               <img
-                src={
-                  movie.poster_url?.includes("/null")
-                    ? "/No-Poster.png"
-                    : movie.poster_url
-                }
-                alt={movie.title}
+                src={movie.poster_url ?? `${import.meta.env.BASE_URL}No-Poster.png`}
+                alt=""
               />
             </li>
           ))}

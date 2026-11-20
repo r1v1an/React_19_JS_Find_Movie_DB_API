@@ -6,7 +6,7 @@ import Trending from "../components/Trending";
 import { fetchMovies, SORT_OPTIONS } from "../services/tmdb-api";
 import { useDebounce } from "react-use";
 import SortControls from "../components/SortControls";
-import { updateSearchCount, getTrendingMovies, getDailyTrendingMovies, logSearchTerm } from "../services/appwrite-api";
+import { getTrendingMovies, isTrendingConfigured, recordSearch } from "../services/appwrite-api";
 import type { Movie, SortOption, TrendingMovie, TrendingPeriod } from "../types";
 
 const Home = () => {
@@ -18,6 +18,7 @@ const Home = () => {
   const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
   const [trendingError, setTrendingError] = useState(false); // Флаг ошибки Appwrite
   const [trendingPeriod, setTrendingPeriod] = useState<TrendingPeriod>("all"); // Период трендов
+  const [trendingRevision, setTrendingRevision] = useState(0);
   const [page, setPage] = useState(1); // Текущая страница результатов
   const [hasMore, setHasMore] = useState(true); // Есть ли еще страницы с результатами
   const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTIONS.POPULAR); // Текущая сортировка discover
@@ -34,21 +35,6 @@ const Home = () => {
     setMovieList([]);
   }, 1000, [searchTerm]);
 
-  const loadTrendingMovies = useCallback(async (period: TrendingPeriod) => {
-    try {
-      if (period === "daily") {
-        const movies = await getDailyTrendingMovies();
-        setTrendingMovies(movies ?? []);
-      } else {
-        const movies = await getTrendingMovies();
-        setTrendingMovies(movies ?? []); // ?? [] защита от undefined на случай сбоя API
-      }
-    } catch (error) {
-      console.error(`Error fetching trending movies: ${error}`);
-      setTrendingError(true); // Показываем пользователю сообщение об ошибке
-    }
-  }, []);
-
   // Сброс при смене сортировки
   const handleSortChange = useCallback((newSort: SortOption) => {
     if (newSort === sortBy) return;
@@ -60,19 +46,21 @@ const Home = () => {
   // Переключение периода трендов
   const handleTrendingPeriodChange = useCallback((period: TrendingPeriod) => {
     if (period === trendingPeriod) return;
+    setTrendingMovies([]);
     setTrendingPeriod(period);
     setTrendingError(false);
-    loadTrendingMovies(period);
-  }, [trendingPeriod, loadTrendingMovies]);
+  }, [trendingPeriod]);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
       setIsLoading(true);
       setErrorMessage("");
       try { 
         const data = await fetchMovies(debouncedSearchTerm, page, sortBy);
+        if (cancelled) return;
         
-        if (data.results.length === 0 || page >= data.total_pages) {
+        if (data.results.length === 0 || page >= Math.min(data.total_pages, 500)) {
           setHasMore(false);
         }
 
@@ -82,19 +70,25 @@ const Home = () => {
         });
         
         if (debouncedSearchTerm.trim() && page === 1 && data.results.length > 0) {
-          updateSearchCount(debouncedSearchTerm, data.results[0]);
-          logSearchTerm(debouncedSearchTerm, data.results[0]);
+          void recordSearch(debouncedSearchTerm, data.results[0])
+            .then((saved) => {
+              if (saved) setTrendingRevision((revision) => revision + 1);
+            })
+            .catch((error: unknown) => {
+              console.error("Error recording search statistics", error);
+            });
         }
       } catch (error) {
+        if (cancelled) return;
         setErrorMessage((error as Error).message || "Error fetching movies");
         if (page === 1) setMovieList([]);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchData();
-    
+    return () => { cancelled = true; };
   }, [debouncedSearchTerm, page, sortBy]);
   
   // Использован IntersectionObserver с помощью хука useCallback (lastMovieElementRef), 
@@ -113,8 +107,18 @@ const Home = () => {
   }, [isLoading, hasMore]);
 
   useEffect(() => {
-    loadTrendingMovies(trendingPeriod);
-  }, [trendingPeriod, loadTrendingMovies]);
+    let cancelled = false;
+    void getTrendingMovies(trendingPeriod).then((movies) => {
+      if (cancelled) return;
+      setTrendingMovies(movies);
+      setTrendingError(false);
+    }).catch((error: unknown) => {
+      if (cancelled) return;
+      console.error("Error fetching trending movies", error);
+      setTrendingError(true);
+    });
+    return () => { cancelled = true; };
+  }, [trendingPeriod, trendingRevision]);
 
   return (
     <main className="main-content">
@@ -122,7 +126,7 @@ const Home = () => {
 
       <div className="wrapper lg:pb-0 pb-3">
         <header className="mt-0">
-          <img src="./hero-img.png" alt="Hero Banner" className="relative -z-1 lg:-mb-16 lg:-mt-16 -mb-8"/>
+          <img src={`${import.meta.env.BASE_URL}hero-img.png`} alt="Hero Banner" className="relative -z-1 lg:-mb-16 lg:-mt-16 -mb-8"/>
           <h1 className="sm:text-6xl">
             Find <span className="text-gradient">Movies</span> You'll Enjoy
             Without the Hassle
@@ -130,12 +134,14 @@ const Home = () => {
         </header>
       </div>
 
-      <Trending
-        movies={trendingMovies}
-        error={trendingError}
-        period={trendingPeriod}
-        onPeriodChange={handleTrendingPeriodChange}
-      />
+      {isTrendingConfigured && (
+        <Trending
+          movies={trendingMovies}
+          error={trendingError}
+          period={trendingPeriod}
+          onPeriodChange={handleTrendingPeriodChange}
+        />
+      )}
 
       <div className="wrapper pt-0">
         <section className="all-movies">

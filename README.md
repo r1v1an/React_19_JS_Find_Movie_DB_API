@@ -36,7 +36,7 @@
 
 ## О проекте
 
-**Find Movies App** — одностраничное приложение (SPA) на React 19 и TypeScript 7 для просмотра, поиска и сохранения любимых фильмов. Интегрируется с **TMDB API** (каталог фильмов) и **Appwrite** (Backend as a Service) для хранения статистики поисковых запросов и избранного.
+**Find Movies App** — одностраничное приложение (SPA) на React 19 и TypeScript 7 для просмотра, поиска и сохранения любимых фильмов. Каталог загружается из **TMDB API**, статистика хранится в **Appwrite**, избранное — в браузере.
 
 Проект создан для демонстрации реальных паттернов фронтенд-разработки: интеграция с REST API, глобальное управление состоянием, постоянное хранилище данных, бесконечная пагинация, оптимизация производительности.
 
@@ -52,11 +52,11 @@
 - **Улучшенный UX карточек** — активная кнопка ❤️ видна всегда, неактивная 🤍 появляется при наведении (Tailwind `group/group-hover`)
 - **Трендовые фильмы** — два режима через `TrendingControls`:
   - **All Time** — агрегированный счётчик поисковых запросов в Appwrite (коллекция `metrics`)
-  - **Last 24h** — группировка по `movie_id` из лога `search_logs` за последние 24 часа
+  - **Last 24h** — группировка по `movie_id` на сервере по 500 последним событиям за 24 часа
 - **Бегущая строка (Ticker)** — лента трендов автоматически прокручивается с CSS `@keyframes`, дублированными элементами и остановкой при наведении
 - **Состояния загрузки и ошибок** — спиннер во время запроса, осмысленные сообщения об ошибках
 - **Защита от null** — фолбэк на `/No-Poster.png` при отсутствии постера
-- **Безопасность** — все API-ключи в переменных окружения (`.env`), не попадают в код
+- **Статистика через Appwrite Function** — функция проверяет запрос, ограничивает частоту и возвращает только данные для отображения топа
 
 ---
 
@@ -82,9 +82,9 @@
 
 ### Требования
 
-- [Node.js](https://nodejs.org/) v18+
+- [Node.js](https://nodejs.org/) 22.12+
 - [TMDB API ключ](https://developer.themoviedb.org/reference/getting-started) (бесплатная регистрация)
-- Проект в [Appwrite](https://appwrite.io/) с настроенной базой данных и **двумя коллекциями**
+- Проект Appwrite Cloud для трендов. Каталог и избранное доступны без настройки Appwrite.
 
 ### 1. Клонировать репозиторий
 
@@ -107,14 +107,14 @@ npm install
 ```env
 VITE_TMDB_API_KEY=YOUR_tmdb_bearer_token
 VITE_APPWRITE_PROJECT_ID=YOUR_appwrite_project_id
-VITE_APPWRITE_DATABASE_ID=YOUR_appwrite_database_id
-VITE_APPWRITE_COLLECTION_ID=YOUR_appwrite_collection_id
-VITE_APPWRITE_COLLECTION_LOGS_ID=YOUR_appwrite_collection_logs_id
+VITE_APPWRITE_TRENDS_FUNCTION_ID=movie-trends
 ```
 
-> ⚠️ Никогда не коммить `.env.local` в репозиторий. Он уже добавлен в `.gitignore`.
+`.env.local` исключён из Git. `VITE_TMDB_API_KEY` используется только локальным Vite без Appwrite Function. Публичный сайт получает данные каталога из функции, где хранятся токен TMDB и секрет лимитера.
 
 Шаблон доступен в файле `.env.example`.
+
+До развёртывания функции локальный сервер Vite может работать с существующими коллекциями Appwrite. Оставьте `VITE_APPWRITE_TRENDS_FUNCTION_ID` пустой и заполните `VITE_APPWRITE_DATABASE_ID`, `VITE_APPWRITE_COLLECTION_ID` и `VITE_APPWRITE_COLLECTION_LOGS_ID`. Для этого режима нужны права чтения и записи в тестовые коллекции. Для production-сборки укажите ID развёрнутой функции.
 
 ### 4. Запустить дев-сервер
 
@@ -126,11 +126,11 @@ npm run dev
 
 ---
 
-## Схема коллекций Appwrite
+## Настройка трендов в Appwrite
 
-Для работы приложения необходимо создать **две коллекции** в одной базе данных Appwrite.
+В одной базе TablesDB нужны три таблицы. Уже созданные `metrics` и `search_logs` доступны через TablesDB по тем же ID.
 
-### Коллекция #1 — `metrics` (VITE_APPWRITE_COLLECTION_ID)
+### `metrics`
 
 Для агрегации трендов «All Time». Каждый поисковый запрос увеличивает счётчик.
 
@@ -141,9 +141,9 @@ npm run dev
 | `movie_id` | Integer | ✅ | Min: -9.22e+18, Max: 9.22e+18 |
 | `poster_url` | String | ✅ | — |
 
-**Permissions**: `read`/`write` для уровня `any` (для портфолио-демонстрации).
+Для фильтра по `searchTerm` и сортировки по `count` добавьте отдельные индексы типа Key.
 
-### Коллекция #2 — `search_logs` (VITE_APPWRITE_COLLECTION_LOGS_ID)
+### `search_logs`
 
 Для лога каждого поискового запроса (режим «Last 24h»). Документы не обновляются, только создаются.
 
@@ -153,15 +153,38 @@ npm run dev
 | `movie_id` | Integer | ✅ | Min: -9.22e+18, Max: 9.22e+18 |
 | `poster_url` | String | ✅ | — |
 
-**Permissions**: `read`/`write` для уровня `any`.
+### `rate_limits`
 
-**Инструкция по созданию**:
-1. Войди в [Appwrite Console](https://console.appwrite.io)
-2. Создай проект → создай базу данных
-3. Внутри базы создай две коллекции с именами `metrics` и `search_logs`
-4. Для каждой коллекции добавь атрибуты по таблице выше
-5. Перейди в **Settings** каждой коллекции → скопируй **Collection ID**
-6. Вставь IDs в `.env.local`
+Создайте обязательный атрибут `count` типа Integer. За минуту функция принимает до 60 запросов каталога и 30 запросов трендов и статистики с одного IP. Записи лимитера старше двух часов удаляются по расписанию. В идентификаторе записи хранится HMAC адреса и номера минуты.
+
+### Function `movie-trends`
+
+1. В [Appwrite Console](https://cloud.appwrite.io/) добавьте Web-платформы для `localhost` и домена GitHub Pages, например `r1v1an.github.io`. Клиент использует регион Frankfurt (`fra`).
+2. Создайте функцию с ID `movie-trends`, рантаймом **Node.js 22**, точкой входа `index.mjs` и командой сборки `npm ci --omit=dev`. Задайте **Execute access → Any**, области `rows.read` и `rows.write` для ключа функции и расписание `0 * * * *` для очистки лимитера.
+3. Задайте переменные функции до её развёртывания.
+
+| Переменная | Значение |
+| --- | --- |
+| `DATABASE_ID` | ID базы |
+| `METRICS_TABLE_ID` | ID таблицы `metrics` |
+| `SEARCH_LOGS_TABLE_ID` | ID таблицы `search_logs` |
+| `RATE_LIMIT_TABLE_ID` | ID таблицы `rate_limits` |
+| `RATE_LIMIT_SECRET` | Случайный секрет длиной от 32 символов |
+| `TMDB_READ_ACCESS_TOKEN` | Токен API Read Access TMDB для каталога, поиска и детальной карточки |
+
+4. Загрузите [архив функции](https://appwrite.io/docs/products/functions/deploy-manually) из `functions/movie-trends`. Следующая команда запускается из корня репозитория.
+
+   ```bash
+   tar -czf movie-trends.tar.gz -C functions/movie-trends index.mjs statistics.mjs tmdb.mjs package.json package-lock.json
+   ```
+
+5. Активируйте развёртывание, заполните `VITE_APPWRITE_PROJECT_ID` и `VITE_APPWRITE_TRENDS_FUNCTION_ID`, перезапустите Vite и проверьте оба периода трендов и новую запись поиска. После перехода всех клиентов на функцию уберите гостевые права на все три коллекции и проверьте права отдельных документов, если включена защита на уровне документов. Для новой установки создавайте коллекции закрытыми с самого начала.
+
+## GitHub Pages
+
+В репозитории установите **Settings → Pages → Source → GitHub Actions**, а в переменных Actions задайте `APPWRITE_PROJECT_ID`. Workflow из `master` проверяет доступность `movie-trends`, собирает приложение с `npm run build -- --mode pages` и публикует его на [GitHub Pages](https://r1v1an.github.io/React_19_JS_Find_Movie_DB_API/).
+
+Сборка `pages` использует путь репозитория для ресурсов и маршруты с `#`, чтобы прямой переход на Favorites и обновление страницы работали на статическом хостинге.
 
 ---
 
@@ -192,12 +215,11 @@ src/
 │
 ├── pages/
 │   ├── Home.tsx                 # Главная (поиск, пагинация, тренды)
-│   ├── Favorites.tsx            # Страница избранного
-│   └── Trending.tsx             # Отдельная страница трендов
+│   └── Favorites.tsx            # Страница избранного
 │
 └── services/
     ├── tmdb-api.ts              # TMDB API (fetchMovies, fetchMovieDetails)
-    └── appwrite-api.ts          # Appwrite API (updateSearchCount, logSearchTerm, getDailyTrendingMovies)
+    └── appwrite-api.ts          # Вызовы Appwrite Function
 ```
 
 ---
@@ -205,9 +227,8 @@ src/
 ## Ключевые технические решения
 
 - **TypeScript-first архитектура** — строгая типизация API-контрактов в `src/types.ts`: `Movie`, `MovieDetails`, `TrendingMovie`, `SortOption`, `TrendingPeriod`, `MovieContextValue`. Все сервисы и UI импортируют типы из одного источника, что исключает расхождение контрактов
-- **Двойная стратегия трендов** — два разных паттерна для двух UX-сценариев:
-  - `updateSearchCount` — агрегирующий счётчик (upsert) через Appwrite для «All Time», один документ на уникальный `searchTerm`
-  - `logSearchTerm` / `getDailyTrendingMovies` — append-only лог с серверной сортировкой `$createdAt` и клиентской группировкой по `movie_id` для «Last 24h»
+- **Запись статистики** — Appwrite Function проверяет первый результат поиска в TMDB. Обновление счётчика и запись события проходят в одной транзакции. Идентификатор события защищает от повторного учёта при повторной отправке.
+- **Чтение статистики** — функция агрегирует топ на сервере и возвращает ID фильма, постер и число поисков. Журнал запросов остаётся в закрытой коллекции.
 - **Server-side фильтрация** — параметры `vote_count.gte` и `primary_release_date.lte` отдаются TMDB API, а не вычисляются на клиенте: для Top Rated — порог 10 000 голосов, для Newest — только вышедшие релизы с ≥100 голосами
 - **IntersectionObserver + useRef** — бесконечная пагинация без сторонних библиотек; флаг `isLoading` предотвращает множественные запросы
 - **Дедупликация через Map** — при дозагрузке страниц фильмы схлопываются по `movie.id` через `Map`, исключая дубликаты на стыке страниц
@@ -216,7 +237,6 @@ src/
 - **Разделение ответственности (SoC)** — логика API вынесена в `src/services/`, компоненты остаются чистыми; два сервиса (TMDB и Appwrite) не зависят друг от друга, оба импортируют только `types.ts`
 - **CSS `@keyframes` вместо JS-скролла** — анимация бегущей строки трендов выполняется на compositor-потоке (60 fps), дублирование элементов обеспечивает бесшовную петлю, остановка при наведении — через `animation-play-state: paused`
 - **Tailwind group/group-hover** — управление видимостью кнопки лайка без единой строки кастомного CSS: неактивная иконка появляется только при наведении на карточку
-- **BFF-паттерн с защитой ключей** — все секреты импортируются через `import.meta.env.VITE_*`, конфигурация `Client` в Appwrite выполняется однократно
 
 ---
 

@@ -53,7 +53,7 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
   if (detailsError || !details) {
     const fallbackPoster = movie.poster_path
       ? `https://image.tmdb.org/t/p/w500/${movie.poster_path}`
-      : "/No-Poster.png";
+      : `${import.meta.env.BASE_URL}No-Poster.png`;
 
     const fallbackYear = movie.release_date ? movie.release_date.split("-")[0] : "N/A";
     const fallbackRating = movie.vote_average ? movie.vote_average.toFixed(1) : "N/A";
@@ -76,7 +76,7 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
 
             <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-gray-100 mt-1">
               <div className="flex items-center gap-1">
-                <img src="star-img.svg" alt="Star" className="size-4" />
+                <img src={`${import.meta.env.BASE_URL}star-img.svg`} alt="Star" className="size-4" />
                 <span className="font-bold text-white">{fallbackRating}</span>
               </div>
               <span>•</span>
@@ -199,7 +199,7 @@ const MovieDetailsModal = ({ movie, details, detailsLoading, detailsError, onClo
 
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/90 mt-3 drop-shadow">
               <div className="flex items-center gap-1">
-                <img src="star-img.svg" alt="Star" className="size-4" />
+                <img src={`${import.meta.env.BASE_URL}star-img.svg`} alt="Star" className="size-4" />
                 <span className="font-bold text-white">{rating}</span>
               </div>
               <span aria-hidden="true">•</span>

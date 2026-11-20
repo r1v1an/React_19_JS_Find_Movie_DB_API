@@ -9,10 +9,11 @@ const Search = ({searchTerm, setSearchTerm}: SearchProps) => { // И не нуж
     return (
         <div className='search mt-0 pt-0 pb-0'>
             <div>
-                <img src="./search.svg" alt="Search" />
+                <img src={`${import.meta.env.BASE_URL}search.svg`} alt="Search" />
                 <input  className='pt-3 pb-3'
                         name="Search placeholder"
                         type="text" 
+                        maxLength={150}
                         placeholder='Search through thousands of movies'
                         value={searchTerm}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(event.target.value)}/> {/* Обработчик изменения */}

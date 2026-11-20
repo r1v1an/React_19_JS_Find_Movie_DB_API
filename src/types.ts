@@ -48,11 +48,9 @@ export interface TMDBResponse {
 
 export interface TrendingMovie {
   $id: string;
-  searchTerm: string;
   count: number;
   movie_id: number;
-  poster_url: string;
-  title?: string;
+  poster_url: string | null;
 }
 
 // ========== Sort options ==========
