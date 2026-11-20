@@ -1,0 +1,12 @@
+{
+  "name": "movie-trends",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "node-appwrite": "32.0.0"
+  }
+}

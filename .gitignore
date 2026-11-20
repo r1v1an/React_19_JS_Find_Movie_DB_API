@@ -7,10 +7,17 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+graphify-out
 node_modules
 dist
 dist-ssr
+plans
 *.local
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+*.tgz
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +29,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.agents
+.claude 
+.clinerules
+.kilo
+skills-lock.json
+react-doctor-report.json

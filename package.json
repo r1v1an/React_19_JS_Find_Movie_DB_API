@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -12,7 +12,9 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.7",
     "appwrite": "^18.1.1",
+    "puppeteer": "^25.3.0",
     "react": "^19.1.0",
+    "react-doctor": "^0.7.8",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.3",
     "react-use": "^17.6.0",
@@ -27,6 +29,12 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "typescript": "^7.0.2",
     "vite": "^6.3.5"
-  }
+  },
+  "description": "> Проект представляет собой React SPA для поиска и отслеживания фильмов на основе TMDB API и облачной базы данных Appwrite.",
+  "main": "eslint.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

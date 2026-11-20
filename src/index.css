@@ -197,7 +197,6 @@
   font-size: 1.5rem;
   padding: 0.5rem;
   background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
   width: 40px;
   height: 40px;
   display: flex;
@@ -229,6 +228,13 @@
   padding: 4rem 2rem;
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
+}
+
+@media (max-width: 640px) {
+  .favorites-empty {
+    margin: 1rem;
+    margin-top: 4rem;
+  }
 }
 
 .favorites-empty h2 {
